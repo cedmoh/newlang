@@ -1,0 +1,3 @@
+main fn {
+  print 'Hello World!'
+}
