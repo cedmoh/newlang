@@ -46,13 +46,13 @@ x i32
 Immutable Variable Initialization:
 
 ```
-x "hello"
+x 'hello'
 ```
 
 Mutable Variable Initialization:
 
 ```
-mut x "hello"
+mut x 'hello'
 ```
 
 Immutable Variable Initialization with Explicit Type:
@@ -243,50 +243,272 @@ True value: `true`
 
 False Value: `false`
 
+Boolean Value in Literal Assignment:
+
+```
+x false
+```
+
 Boolean Value in Assignment:
 
 ```
-bool x false
+x false = y
 ```
 
 ## Compound
 
 ### Tuple
 
-Tuple Type and Literal Value in Assignment:
+#### Type Definition
+
+Tuple Type Definition:
 
 ```
-(i32, f64, u8) tuple (500, 6.4, 2)
+(i32 f64 u8)
 ```
 
-Tuple Value Access:
+Tuple Type Definition with Named Fields:
 
 ```
-tuple.0
+(width u32, height u32, zIndex i32)
+```
+
+Nested Tuple Type Definition:
+
+```
+((i32 f64) (u8 u16))
+```
+
+Tuple Type Definition with Generic Type:
+
+```
+myGenericFunction fn<T> -> (T T)
+```
+
+Tuple Type Definition with Generic Type and Named Fields:
+
+```
+myGenericFunction fn<T> -> (width T, height T)
+``` 
+
+#### Variable Definition
+
+Tuple Value in Literal Assignment:
+
+```
+myTuple (1, 2, 3)
+```
+
+Tuple Variable Definition with Named Fields:
+
+```
+myTuple (zIndex 1, width 100, height 200)
+``` 
+
+Tuple Variable Definition with Type Cast:
+
+```
+myTuple (1, 2, 3) as MyTupleType
+```
+
+
+
+#### Access in Expression
+
+Tuple Value Access with unnamed fields:
+
+```
+myTuple.0
+```
+
+Tuple Value Access with named fields:
+
+```
+myTuple.width
+```
+
+#### Pattern Matching
+
+Tuple Pattern Matching:
+
+```
+match myTuple {
+    (x, y, z) -> todo
+}
 ```
 
 ### Array
 
-Array Type and Literal Value in Assignment:
+#### Type Definition
+
+Array Type Definition:
 
 ```
-i32[5] array [1, 2, 3, 4, 5]
+str[]
+```
+
+```
+(u8, u8)[]
+```
+
+Nested Array Type Definition:
+
+```
+i32[][]
+```
+
+Array Type Definition with Length:
+
+```
+u8[16]
+```
+
+Array Value in Literal Assignment:
+
+```
+array [1, 2, 3, 4, 5]
+```
+
+### 2D Matrix
+
+#### Type Definition
+
+Matrix Type Definition:
+
+```
+i32[16 16]
+```
+
+#### Value in Literal Assignment:
+
+myMatrix | 1, 2, 3 |
+         | 4, 5, 6 |
+         | 7, 8, 9 |
+
+#### Access in Expression
+
+```
+myMatrix[0, 1]
+```
+
+### String
+
+String literal
+
+```
+'This is a string literal'
 ```
 
 # Functions
 
 ## Declaration
 
-Function Declaration:
+Function Declaration with Empty Body:
 
 ```
-f () {}
+myFunction fn
 ```
 
-Function with Parameters
-
 ```
-f (a i32, b i32) {}
+myFunction fn {}
 ```
 
-Function with
+Function with a return value
+
+```
+myFunction fn {
+    ret 0
+}
+```
+
+myFunction fn param1, param2 {
+
+}
+
+myFunction FunctionType fn param1, param2 {
+
+}
+
+myFunction fn param1 ParamType, param2 Param2Type {
+
+}
+
+myFunction fn -> ReturnType {}
+
+myFunction fn param1, param2 -> ReturnType {
+
+}
+
+function myFunction<T>(param1, param2: GenericParam<T>): GenericReturnType<T> {
+
+}
+
+myFunction fn<T> param1, param2 GenericParam<T> -> GenericReturnType<T> {
+    
+}
+
+myFunction fn<T TypeConstraint + AnotherTypeConstraint, U> param {
+
+}
+
+myFunction  fn<T> param where TypeConstraint + AnotherTypeConstraint, U {
+
+}
+
+@myDecorator
+myFunction fn
+
+@myDecorator decoratorParam1, decoratorParam2
+myFunction fn
+
+@firstDecorator decoratorParam
+@secondDecorator 
+myFunction fn
+
+myFunction
+
+myFunction()
+
+myFunction param1, param2
+
+myFunction(param1, param2)
+
+myFunction.call
+
+myFunction<T>
+
+myFunction<Type1 Type2 Type3> param1, param2, param3
+
+myLambda () {}
+
+# Function Call
+
+myFunction
+
+myFunction param
+
+myFunction param1, param2
+
+myFunction<GenericParam> param
+
+myFunction<GenericParam1 GenericParam2> param1 param2
+
+
+
+# Structs
+
+myStruct struct
+
+myStruct struct {}
+
+myStruct struct {
+    field Type
+    anotherField AnotherType
+}
+
+# Enums 
+
+myEnum enum {
+    Variant
+    AnotherVariant
+}
