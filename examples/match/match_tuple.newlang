@@ -1,0 +1,7 @@
+main fn {
+  match true, false {
+    true, false do print 'Executed!'
+    true, _ do print 'Not Executed :('
+    _ do print 'Not Executed :('
+  }
+}

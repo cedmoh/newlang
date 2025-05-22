@@ -1,0 +1,5 @@
+main fn {
+  while true {
+    break
+  }
+}

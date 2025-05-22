@@ -91,7 +91,7 @@ Negation: `-`
 
 ### Logical
 
-Logical Not: `!`
+Logical Not: `not` or `!`
 
 ## Binary Operators
 
@@ -133,15 +133,15 @@ Greater Than or Equal: `>=`
 
 Less Than or Equal: `<=`
 
-Equal to: `==`
+Equal to: `eq` or `==`
 
-Not Equal to: `!=`
+Not Equal to: `neq` or `!=`
 
 ### Logical
 
-Logical AND: `&&`
+Logical AND: `and` or `&&`
 
-Logical OR: `||`
+Logical OR: `or` or `||`
 
 ### Logical Assignment
 
@@ -252,7 +252,7 @@ x false
 Boolean Value in Assignment:
 
 ```
-x false = y
+x bool = y
 ```
 
 ## Compound
@@ -289,7 +289,7 @@ Tuple Type Definition with Generic Type and Named Fields:
 
 ```
 myGenericFunction fn<T> -> (width T, height T)
-``` 
+```
 
 #### Variable Definition
 
@@ -303,15 +303,13 @@ Tuple Variable Definition with Named Fields:
 
 ```
 myTuple (zIndex 1, width 100, height 200)
-``` 
+```
 
 Tuple Variable Definition with Type Cast:
 
 ```
 myTuple (1, 2, 3) as MyTupleType
 ```
-
-
 
 #### Access in Expression
 
@@ -382,8 +380,8 @@ i32[16 16]
 #### Value in Literal Assignment:
 
 myMatrix | 1, 2, 3 |
-         | 4, 5, 6 |
-         | 7, 8, 9 |
+| 4, 5, 6 |
+| 7, 8, 9 |
 
 #### Access in Expression
 
@@ -421,79 +419,127 @@ myFunction fn {
 }
 ```
 
-myFunction fn param1, param2 {
+Function with Multiple Arguments:
 
-}
+```
+myFunction fn arg1, arg2 {}
+```
 
-myFunction FunctionType fn param1, param2 {
+Function with Function Type and Multiple Arguments:
 
-}
+```
+myFunction FunctionType fn arg1, arg2 {}
+```
 
-myFunction fn param1 ParamType, param2 Param2Type {
+Function with Typed Arguments:
 
-}
+```
+myFunction fn arg1 ArgOneType, arg2 ArgTwoType {}
+```
 
+Function with Return Type:
+
+```
 myFunction fn -> ReturnType {}
+```
 
-myFunction fn param1, param2 -> ReturnType {
+Function with Multiple Arguments and Return Type:
 
-}
+```
+myFunction fn arg1, arg2 -> ReturnType {}
+```
 
-function myFunction<T>(param1, param2: GenericParam<T>): GenericReturnType<T> {
+Function with Generic Type in Argument and Return Type:
 
-}
+```
+myFunction fn<T> arg2 GenericArgument<T> -> GenericReturnType<T> {}
+```
 
-myFunction fn<T> param1, param2 GenericParam<T> -> GenericReturnType<T> {
-    
-}
+Function with Multiple Generic Types:
 
-myFunction fn<T TypeConstraint + AnotherTypeConstraint, U> param {
+```
+myFunction fn<T, U> {}
+```
 
-}
+Function with Multiple Generic Types and Constraints:
 
-myFunction  fn<T> param where TypeConstraint + AnotherTypeConstraint, U {
+```
+myFunction fn<T TypeConstraint + AnotherTypeConstraint, U> arg {}
+```
 
-}
+## Function Call
 
+Function Call with No Arguments:
+
+```
+myFunction
+```
+
+Function Call with one Parameter:
+
+```
+myFunction param
+```
+
+Function Call with Multiple Arguments:
+
+```
+myFunction param1, param2
+```
+
+Function Call with Explicit Generic Type:
+
+```
+myFunction<GenericParam> param
+```
+
+Function Call with Multiple Explicit Generic Types:
+
+```
+myFunction<GenericParam1 GenericParam2> param1 param2
+```
+
+# Decorators
+
+## Function Decorators
+
+Function Decorator with No Parameters:
+
+```
 @myDecorator
 myFunction fn
+```
 
+Function Decorator with Parameters:
+
+```
 @myDecorator decoratorParam1, decoratorParam2
 myFunction fn
+```
 
+Multiple Function Decorators on the Same Function:
+
+```
 @firstDecorator decoratorParam
-@secondDecorator 
+@secondDecorator
 myFunction fn
+```
 
-myFunction
+# Closures
 
-myFunction()
+## Declaration
 
-myFunction param1, param2
+Closure Declaration with Empty Body:
 
-myFunction(param1, param2)
-
-myFunction.call
-
-myFunction<T>
-
-myFunction<Type1 Type2 Type3> param1, param2, param3
-
+```
 myLambda () {}
+```
 
-# Function Call
+Closure Declaration with Arguments:
 
-myFunction
-
-myFunction param
-
-myFunction param1, param2
-
-myFunction<GenericParam> param
-
-myFunction<GenericParam1 GenericParam2> param1 param2
-
-
+```
+myLambda (arg1, arg2) {}
+```
 
 # Structs
 
@@ -502,13 +548,13 @@ myStruct struct
 myStruct struct {}
 
 myStruct struct {
-    field Type
-    anotherField AnotherType
+field Type
+anotherField AnotherType
 }
 
-# Enums 
+# Enums
 
 myEnum enum {
-    Variant
-    AnotherVariant
+Variant
+AnotherVariant
 }

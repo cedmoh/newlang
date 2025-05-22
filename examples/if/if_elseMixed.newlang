@@ -1,0 +1,6 @@
+main fn {
+  if false do 'Not Executed!'
+  else {
+    print 'Executed!'
+  }
+}

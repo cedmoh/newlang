@@ -1,0 +1,3 @@
+main fn {
+  if true do print 'Executed!'
+}

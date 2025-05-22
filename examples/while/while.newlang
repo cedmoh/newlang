@@ -1,0 +1,3 @@
+main fn {
+  while true do print `Looping forever!`
+}
