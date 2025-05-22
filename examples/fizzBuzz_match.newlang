@@ -1,0 +1,8 @@
+main fn {
+  for num in 1..100 print match num % 3, num % 5 {
+    0, 0 then 'FizzBuzz',
+    0, _ then 'Fizz',
+    _, 0 then 'Buzz',
+    _    then num
+  }
+}

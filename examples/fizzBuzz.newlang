@@ -1,7 +1,0 @@
-main fn {
-  for num in 0..100 print
-    if num rem 3 == 0 and num rem 5 == 0 { 'FizzBuzz' }
-    elif num rem 3 == 0 { 'Fizz' }
-    elif num rem 5 == 0 { 'Buzz' }
-    else num
-}
