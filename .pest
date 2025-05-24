@@ -1,21 +1,41 @@
-program = { SOI ~ body ~ EOI }
-body    = { expressions? }
+program =  { SOI ~ body ~ EOI }
+body    = _{ expressions? }
 
-expressions = { expression+ }
-expression  = { declaration }
+expressions = _{ expression+ }
+expression  = _{ declarations | literal | unresolved_chain }
 
-declaration     = { var_declaration }
-var_declaration = { literal_var_declaration }
+declarations = _{ (declaration ~ newlines)+ }
+declaration  = _{ var_declaration }
+
+// Identifiers
+identifier = @{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+
+// this could represent either:
+// - a function call
+// - or a variable declaration
+// depending on the type of the first identifier
+unresolved_chain = { identifier ~ (identifier | expression)* }
+
+// Keywords
+mut = @{ "mut" }
+
+// Operators
+assignment = @{ "=" }
 
 // Variables
-var_name                = { ASCII_ALPHA+ }
-literal_var_declaration = { var_name ~ literal }
+var_declaration = _{ assignment_var_declaration | literal_var_declaration | uninitialized_var_declaration }
+
+var_name = @{ identifier }
+var_type = @{ identifier }
+
+literal_var_declaration       = { mut? ~ var_name ~ var_type? ~ literal }
+uninitialized_var_declaration = { mut ~ var_name ~ var_type? }
+assignment_var_declaration    = { mut? ~ var_name ~ var_type? ~ assignment ~ expression }
 
 // Literals
 literal        = { string_literal }
-string_literal = { string_marker ~ string_text ~ string_marker }
-string_marker  = { "'" }
-string_text    = { (!string_marker ~ ANY)* }
+string_literal = { "'" ~ string_text ~ "'" }
+string_text    = { (!"'" ~ ANY)* }
 
 // Comments
 COMMENT             = ${ (multi_comment | inline_comment | single_comment) ~ newlines }
