@@ -1,27 +1,30 @@
 program = { SOI ~ body ~ EOI }
-body    = { exprs? }
+body    = { expressions? }
 
-exprs = { expr+ }
-expr  = { decl }
+expressions = { expression+ }
+expression  = { declaration }
 
-decl = { var_decl }
+declaration     = { var_declaration }
+var_declaration = { literal_var_declaration }
 
-var_decl     = { lit_var_decl }
-var_name     = { ASCII_ALPHA+ }
-lit_var_decl = { var_name ~ lit }
+// Variables
+var_name                = { ASCII_ALPHA+ }
+literal_var_declaration = { var_name ~ literal }
 
-lit         = { str_lit }
-str_lit     = { str_marker ~ str ~ str_marker }
-str_marker = { "'" }
-str         = { (!str_marker ~ ANY)* }
+// Literals
+literal        = { string_literal }
+string_literal = { string_marker ~ string_text ~ string_marker }
+string_marker  = { "'" }
+string_text    = { (!string_marker ~ ANY)* }
 
+// Comments
 COMMENT             = ${ (multi_comment | inline_comment | single_comment) ~ newlines }
-single_comment_body = { (!NEWLINE ~ ANY)* }
-single_comment      = { !"###" ~ !"##" ~ "#" ~ single_comment_body? }
-multi_comment_body  = { (!"###" ~ ANY)* }
-multi_comment       = { "###" ~ multi_comment_body ~ "###" }
-inline_comment_body = { (!"##" ~ ANY)* }
-inline_comment      = { "##" ~ inline_comment_body? ~ "##" }
+single_comment_body =  { (!NEWLINE ~ ANY)* }
+single_comment      =  { !"###" ~ !"##" ~ "#" ~ single_comment_body? }
+multi_comment_body  =  { (!"###" ~ ANY)* }
+multi_comment       =  { "###" ~ multi_comment_body ~ "###" }
+inline_comment_body =  { (!"##" ~ ANY)* }
+inline_comment      =  { "##" ~ inline_comment_body? ~ "##" }
 
 WHITESPACE = _{ " " }
 
