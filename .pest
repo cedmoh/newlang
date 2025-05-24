@@ -1,0 +1,28 @@
+program = { SOI ~ body ~ EOI }
+body    = { exprs? }
+
+exprs = { expr+ }
+expr  = { decl }
+
+decl = { var_decl }
+
+var_decl     = { lit_var_decl }
+var_name     = { ASCII_ALPHA+ }
+lit_var_decl = { var_name ~ lit }
+
+lit         = { str_lit }
+str_lit     = { str_marker ~ str ~ str_marker }
+str_marker = { "'" }
+str         = { (!str_marker ~ ANY)* }
+
+COMMENT             = ${ (multi_comment | inline_comment | single_comment) ~ newlines }
+single_comment_body = { (!NEWLINE ~ ANY)* }
+single_comment      = { !"###" ~ !"##" ~ "#" ~ single_comment_body? }
+multi_comment_body  = { (!"###" ~ ANY)* }
+multi_comment       = { "###" ~ multi_comment_body ~ "###" }
+inline_comment_body = { (!"##" ~ ANY)* }
+inline_comment      = { "##" ~ inline_comment_body? ~ "##" }
+
+WHITESPACE = _{ " " }
+
+newlines = _{ (NEWLINE)* }
