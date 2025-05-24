@@ -43,13 +43,13 @@ Immutable Variable Declaration with Explicit Type:
 x i32
 ```
 
-Immutable Variable Initialization:
+Immutable Variable Initialization with Literal:
 
 ```
 x 'hello'
 ```
 
-Mutable Variable Initialization:
+Mutable Variable Initialization with Literal:
 
 ```
 mut x 'hello'
@@ -79,6 +79,18 @@ Variable Initialization with Multiline Block Expression:
 x {
   2 + 2
 }
+```
+
+Variable Initialization with Function Call:
+
+```
+x = myFunction
+```
+
+Variable Initialization with Identifier:
+
+```
+x = y
 ```
 
 # Operators
@@ -185,58 +197,6 @@ Unsigned Right Shift Assignment `>>>=`
 
 ## Scalar
 
-### Integer
-
-| Length  | Signed | Unsigned |
-| ------- | ------ | -------- |
-| 8-bit   | i8     | u8       |
-| 16-bit  | i16    | u16      |
-| 32-bit  | i32    | u32      |
-| 64-bit  | i64    | u64      |
-| 128-bit | i128   | u128     |
-| arch    | isize  | usize    |
-
-Integer Literals:
-
-| Literal | Example        |
-| ------- | -------------- |
-| Decimal | 98_222         |
-| Hex     | 0xff           |
-| Octal   | 0o77           |
-| Binary  | 0b1111_0000    |
-| Byte    | (u8 only) b'A' |
-
-Integer Value in Assignment:
-
-```
-x 42
-```
-
-```
-color u32 0xff0055
-```
-
-```
-mask i32 0b1101_0010
-```
-
-### Float
-
-| Length | Type |
-| ------ | ---- |
-| 32-bit | f32  |
-| 64-bit | f64  |
-
-Float Value in Assignment:
-
-```
-offsetX f32 100.
-```
-
-```
-offsetY f64 42.005
-```
-
 ### Boolean
 
 True value: `true`
@@ -255,7 +215,97 @@ Boolean Value in Assignment:
 x bool = y
 ```
 
+### Numeric
+
+#### Integer
+
+Integer in Literal Assignment:
+
+```
+x 42
+```
+
+```
+y -100_234
+```
+
+#### Decimal
+
+Decimal in Literal Assignment:
+
+```
+offsetX f32 99.95
+```
+
+```
+offsetY f64 -1_234.005
+```
+
+#### Hexadecimal
+
+Hexadecimal in Literal Assignment:
+
+```
+color #FF0099
+```
+
+```
+alpha #000000FF
+```
+
+#### Binary
+
+Binary in Literal Assignment:
+
+```
+num b0010
+```
+
+```
+mask b_1010100
+```
+
+#### Octal
+
+Octal in Literal Assignment:
+
+```
+octalValue o0755
+```
+
+```
+octalValue o_0755
+```
+
+### Character
+
+Character in Literal Assignment:
+
+```
+char c'A'
+```
+
 ## Compound
+
+### String
+
+String in Literal Assignment:
+
+```
+msg 'Hello, World!'
+```
+
+String with Escape Sequences:
+
+```
+msg 'Hello, \nWorld!'
+```
+
+String with Unicode Characters:
+
+```
+msg 'Hello, 世界!'
+```
 
 ### Tuple
 
@@ -267,10 +317,18 @@ Tuple Type Definition:
 (i32 f64 u8)
 ```
 
+```
+(String)
+```
+
 Tuple Type Definition with Named Fields:
 
 ```
 (width u32, height u32, zIndex i32)
+```
+
+```
+(size u32,)
 ```
 
 Nested Tuple Type Definition:
@@ -293,22 +351,46 @@ myGenericFunction fn<T> -> (width T, height T)
 
 #### Variable Definition
 
-Tuple Value in Literal Assignment:
+Tuple Literal with Literals as Members:
 
 ```
-myTuple (1, 2, 3)
+(1, 2, 3)
 ```
 
-Tuple Variable Definition with Named Fields:
+Tuple Literal with Literals of Different Types:
 
 ```
-myTuple (zIndex 1, width 100, height 200)
+(1, 2.5, 'c')
 ```
 
-Tuple Variable Definition with Type Cast:
+Tuple Literal with Evaluated Members:
 
 ```
-myTuple (1, 2, 3) as MyTupleType
+(2 + 2, sine 10, width)
+```
+
+Tuple Literal with Nested Tuples:
+
+```
+(1, (2, 3), 4)
+```
+
+Tuple Literal with Named Fields:
+
+```
+(zIndex 1, width 100, height 200)
+```
+
+Tuple Literal with Named Fields and Mixed Types:
+
+```
+(width 100, height 200, zIndex 'z')
+```
+
+Tuple Literal with Named Fields and Nested Tuples:
+
+```
+(size, (width 100, height 200), zIndex 1)
 ```
 
 #### Access in Expression
@@ -327,12 +409,26 @@ myTuple.width
 
 #### Pattern Matching
 
-Tuple Pattern Matching:
+Tuple Pattern Matching Arm:
 
 ```
 match myTuple {
-    (x, y, z) -> todo
+    x, y, z do todo
 }
+```
+
+Tuple Pattern Matching Target:
+
+```
+match x, y {
+  _ do todo
+}
+```
+
+Tuple Destructuring with Named Fields:
+
+```
+x, y, z = myFunction
 ```
 
 ### Array
@@ -342,29 +438,61 @@ match myTuple {
 Array Type Definition:
 
 ```
+
 str[]
+
 ```
 
 ```
+
 (u8, u8)[]
+
 ```
 
 Nested Array Type Definition:
 
 ```
+
 i32[][]
+
 ```
 
 Array Type Definition with Length:
 
 ```
+
 u8[16]
+
 ```
 
 Array Value in Literal Assignment:
 
 ```
+
 array [1, 2, 3, 4, 5]
+
+```
+
+#### Pattern Matching
+
+Array Pattern Matching Arm:
+
+```
+match myArray {
+    x, y, z do todo
+}
+```
+
+```
+match myArray {
+    x, .. do todo
+}
+```
+
+```
+match myArray {
+    x, ..y do todo
+}
 ```
 
 ### 2D Matrix
@@ -374,7 +502,9 @@ array [1, 2, 3, 4, 5]
 Matrix Type Definition:
 
 ```
+
 i32[16 16]
+
 ```
 
 #### Value in Literal Assignment:
@@ -387,14 +517,6 @@ myMatrix | 1, 2, 3 |
 
 ```
 myMatrix[0, 1]
-```
-
-### String
-
-String literal
-
-```
-'This is a string literal'
 ```
 
 # Functions
@@ -415,7 +537,7 @@ Function with a return value
 
 ```
 myFunction fn {
-    ret 0
+  ret 0
 }
 ```
 
@@ -543,18 +665,69 @@ myLambda (arg1, arg2) {}
 
 # Structs
 
+## Declaration
+
+Empty Struct Declaration:
+
+```
 myStruct struct
+```
 
+```
 myStruct struct {}
+```
 
+Struct Declaration with Fields:
+
+```
 myStruct struct {
-field Type
-anotherField AnotherType
+  field Type
+  anotherField AnotherType
 }
+```
+
+Generic Struct Declaration:
+
+```
+myGenericStruct struct<T> {
+  field GenericType<T>
+}
+```
 
 # Enums
 
+## Declaration
+
+Enum Declaration:
+
+```
 myEnum enum {
-Variant
-AnotherVariant
+  Variant
+  AnotherVariant
 }
+```
+
+Enum Declaration with Custom Variant Values:
+
+```
+myEnum enum {
+  Variant 1
+  AnotherVariant 2
+}
+```
+
+```
+myEnum enum {
+  Variant 'value'
+  AnotherVariant 'another value'
+}
+```
+
+Enum Declaration with Loaded Variants:
+
+```
+myEnum enum {
+  Variant(width u32, height u32)
+  AnotherVariant(string number)
+}
+```
