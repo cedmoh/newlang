@@ -1,44 +1,69 @@
 program =  { SOI ~ body ~ EOI }
 body    = _{ expressions? }
 
-expressions = _{ expression+ }
-expression  = _{ declarations | literal | unresolved_chain }
+expressions = _{ (expression ~ newlines)+ }
+expression  = _{ block | declarations | chain | arithmetic_expression | literal }
 
 declarations = _{ (declaration ~ newlines)+ }
 declaration  = _{ var_declaration }
 
 // Identifiers
-identifier = @{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
-
-// this could represent either:
-// - a function call
-// - or a variable declaration
-// depending on the type of the first identifier
-unresolved_chain = { identifier ~ (identifier | expression)* }
+// TODO: can we allow identifiers to start with numbers if we exclude all number literals?
+// identifier = @{ !number_literal ~ ASCII_ALPHANUMERIC+ }
+identifier = @{ !number_literal ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 
 // Keywords
-mut = @{ "mut" }
+var   = @{ "var" }
+val   = @{ "val" }
+true  = @{ "true" }
+false = @{ "false" }
 
 // Operators
-assignment = @{ "=" }
+assignment     = @{ "=" }
+addition       = @{ "+" }
+subtraction    = @{ "-" }
+multiplication = @{ "*" }
+division       = @{ "/" }
+
+// Blocks
+block = { "{" ~ newlines ~ expressions ~ newlines ~ "}" }
+
+// Functions
+// this is evaluated to either a function call or a variable access
+chain = { identifier ~ (expression ~ ","?)* }
 
 // Variables
-var_declaration = _{ assignment_var_declaration | literal_var_declaration | uninitialized_var_declaration }
+var_declaration = _{ assignment_var_declaration | literal_var_declaration | block_var_declaration | uninitialized_var_declaration }
 
-var_name = @{ identifier }
-var_type = @{ identifier }
+var_name   = @{ identifier }
+var_type   = @{ identifier }
+val_or_var = @{ var | val }
 
-literal_var_declaration       = { mut? ~ var_name ~ var_type? ~ literal }
-uninitialized_var_declaration = { mut ~ var_name ~ var_type? }
-assignment_var_declaration    = { mut? ~ var_name ~ var_type? ~ assignment ~ expression }
+var_nomination                = { var_name ~ val_or_var ~ var_type? }
+uninitialized_var_declaration = { var_nomination }
+block_var_declaration         = { var_nomination ~ block }
+literal_var_declaration       = { var_nomination ~ literal }
+assignment_var_declaration    = { var_nomination ~ assignment ~ expression }
+
+// Arithmetic Expression
+arithmetic_operator   = { addition | subtraction | multiplication | division }
+arithmetic_expression = { (literal ~ arithmetic_operator)+ ~ literal }
 
 // Literals
-literal        = { string_literal }
-string_literal = { "'" ~ string_text ~ "'" }
-string_text    = { (!"'" ~ ANY)* }
+literal             = { character_literal | string_literal | number_literal | hexadecimal_literal }
+string_literal      = { "'" ~ string_text ~ "'" }
+string_text         = { (!"'" ~ ANY)* }
+// TODO: Implement with c'<char>'
+character_literal   = { "^" ~ ANY }
+number_literal      = { decimal_literal | binary_literal | octal_literal | hexadecimal_literal }
+decimal_literal     = { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")*)? }
+hexadecimal_literal = { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
+binary_literal      = { "b" ~ ('0'..'1' | "_")+ }
+octal_literal       = { "o" ~ ('0'..'7' | "_")+ }
+boolean_literal     = { true | false }
 
 // Comments
-COMMENT             = ${ (multi_comment | inline_comment | single_comment) ~ newlines }
+COMMENT             = ${ !hexadecimal_literal ~ (multi_comment | inline_comment | single_comment) ~ newlines }
 single_comment_body =  { (!NEWLINE ~ ANY)* }
 single_comment      =  { !"###" ~ !"##" ~ "#" ~ single_comment_body? }
 multi_comment_body  =  { (!"###" ~ ANY)* }

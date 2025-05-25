@@ -23,60 +23,62 @@ Inline Comment:
 
 # Variables
 
-Immutable Variable Declaration:
+Immutable Uninitialized Variable Declaration:
 
 ```
-x
+x val
 ```
 
-**NOTE** Immutable variable declaration without initialization is illegal and will not compile.
+**NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
 
-Mutable Variable Declaration:
-
-```
-mut x
-```
-
-Immutable Variable Declaration with Explicit Type:
+Mutable Uninitialized Variable Declaration:
 
 ```
-x i32
+x var i32
 ```
+
+Immutable Uninitialized Variable Declaration with Explicit Type:
+
+```
+x val i32
+```
+
+**NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
 
 Immutable Variable Initialization with Literal:
 
 ```
-x 'hello'
+x val 'hello'
 ```
 
-Mutable Variable Initialization with Literal:
+Mutable Variable Declaration Initialized with Literal:
 
 ```
-mut x 'hello'
+x var 'hello'
 ```
 
-Immutable Variable Initialization with Explicit Type:
+Immutable Variable Declaration Initialized with Literal Specifying Explicit Type:
 
 ```
-x i32 42
+x val int 42
 ```
 
 Mutable Variable Initialization with Explicit Type:
 
 ```
-mut x u32 100
+x val int 100
 ```
 
 Variable Initialization with Expression:
 
 ```
-x 2 + 2
+x val = 2 + 2
 ```
 
 Variable Initialization with Multiline Block Expression:
 
 ```
-x {
+x val {
   2 + 2
 }
 ```
@@ -84,13 +86,13 @@ x {
 Variable Initialization with Function Call:
 
 ```
-x = myFunction
+x val = myFunction
 ```
 
 Variable Initialization with Identifier:
 
 ```
-x = y
+x val = y
 ```
 
 # Operators
@@ -206,13 +208,13 @@ False Value: `false`
 Boolean Value in Literal Assignment:
 
 ```
-x false
+x val false
 ```
 
 Boolean Value in Assignment:
 
 ```
-x bool = y
+x val bool = y
 ```
 
 ### Numeric
@@ -222,11 +224,11 @@ x bool = y
 Integer in Literal Assignment:
 
 ```
-x 42
+x val 42
 ```
 
 ```
-y -100_234
+y val -100_234
 ```
 
 #### Decimal
@@ -234,7 +236,7 @@ y -100_234
 Decimal in Literal Assignment:
 
 ```
-offsetX f32 99.95
+offsetX val f32 99.95
 ```
 
 ```
@@ -246,11 +248,11 @@ offsetY f64 -1_234.005
 Hexadecimal in Literal Assignment:
 
 ```
-color #FF0099
+color val #FF0099
 ```
 
 ```
-alpha #000000FF
+alpha val #000000FF
 ```
 
 #### Binary
@@ -258,11 +260,11 @@ alpha #000000FF
 Binary in Literal Assignment:
 
 ```
-num b0010
+num val b0010
 ```
 
 ```
-mask b_1010100
+mask val b_1010100
 ```
 
 #### Octal
@@ -270,11 +272,11 @@ mask b_1010100
 Octal in Literal Assignment:
 
 ```
-octalValue o0755
+octalValue val o0755
 ```
 
 ```
-octalValue o_0755
+octalValue val o_0755
 ```
 
 ### Character
@@ -282,8 +284,10 @@ octalValue o_0755
 Character in Literal Assignment:
 
 ```
-char c'A'
+char val c'A'
 ```
+
+**NOTE:** Currently implemented as `^A`.
 
 ## Compound
 
@@ -292,19 +296,19 @@ char c'A'
 String in Literal Assignment:
 
 ```
-msg 'Hello, World!'
+msg val 'Hello, World!'
 ```
 
 String with Escape Sequences:
 
 ```
-msg 'Hello, \nWorld!'
+msg val 'Hello, \nWorld!'
 ```
 
 String with Unicode Characters:
 
 ```
-msg 'Hello, 世界!'
+msg val 'Hello, 世界!'
 ```
 
 ### Tuple
@@ -438,39 +442,29 @@ x, y, z = myFunction
 Array Type Definition:
 
 ```
-
 str[]
-
 ```
 
 ```
-
 (u8, u8)[]
-
 ```
 
 Nested Array Type Definition:
 
 ```
-
 i32[][]
-
 ```
 
 Array Type Definition with Length:
 
 ```
-
 u8[16]
-
 ```
 
 Array Value in Literal Assignment:
 
 ```
-
 array [1, 2, 3, 4, 5]
-
 ```
 
 #### Pattern Matching
@@ -502,9 +496,7 @@ match myArray {
 Matrix Type Definition:
 
 ```
-
 i32[16 16]
-
 ```
 
 #### Value in Literal Assignment:
