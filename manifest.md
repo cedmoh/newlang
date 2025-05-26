@@ -525,6 +525,18 @@ myFunction fn
 myFunction fn {}
 ```
 
+Function Declaration with Single Line Body:
+
+```
+myFunction fn do print 'Hello!'
+```
+
+Function Declaration with Multiple Lines Defined Using `do`:
+
+```
+myFunction fn do print 'Hello' do print 'World!'
+```
+
 Function with a return value
 
 ```

@@ -5,18 +5,22 @@ expressions = _{ (expression ~ newlines)+ }
 expression  = _{ block | declarations | chain | arithmetic_expression | literal }
 
 declarations = _{ (declaration ~ newlines)+ }
-declaration  = _{ var_declaration }
+declaration  = _{ var_declaration | fn_declaration }
 
 // Identifiers
 // TODO: can we allow identifiers to start with numbers if we exclude all number literals?
 // identifier = @{ !number_literal ~ ASCII_ALPHANUMERIC+ }
-identifier = @{ !number_literal ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+identifier = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 
 // Keywords
-var   = @{ "var" }
-val   = @{ "val" }
-true  = @{ "true" }
-false = @{ "false" }
+var     = @{ "var" }
+val     = @{ "val" }
+true    = @{ "true" }
+false   = @{ "false" }
+fn      = @{ "fn" }
+ret     = @{ "ret" }
+do      = @{ "do" }
+keyword =  { var | val | true | false | fn | ret | do }
 
 // Operators
 assignment     = @{ "=" }
@@ -26,11 +30,21 @@ multiplication = @{ "*" }
 division       = @{ "/" }
 
 // Blocks
-block = { "{" ~ newlines ~ expressions ~ newlines ~ "}" }
+block = { "{" ~ newlines ~ expressions? ~ newlines ~ "}" }
 
 // Functions
 // this is evaluated to either a function call or a variable access
 chain = { identifier ~ (expression ~ ","?)* }
+
+fn_declaration =  { identifier ~ fn ~ fn_args? ~ fn_body? }
+fn_body        =  { fn_block | fn_dos }
+fn_block       =  { "{" ~ newlines ~ (expressions | ret)* ~ newlines ~ "}" }
+fn_dos         =  { (fn_do)+ }
+fn_do          =  { do ~ expression }
+fn_args        =  { "("? ~ fn_arg? ~ ("," ~ fn_arg)* ~ ")"? }
+fn_arg         =  { arg_name ~ (":"? ~ arg_type)? }
+arg_name       = @{ identifier }
+arg_type       = @{ identifier }
 
 // Variables
 var_declaration = _{ assignment_var_declaration | literal_var_declaration | block_var_declaration | uninitialized_var_declaration }
@@ -50,9 +64,9 @@ arithmetic_operator   = { addition | subtraction | multiplication | division }
 arithmetic_expression = { (literal ~ arithmetic_operator)+ ~ literal }
 
 // Literals
-literal             = { character_literal | string_literal | number_literal | hexadecimal_literal }
-string_literal      = { "'" ~ string_text ~ "'" }
-string_text         = { (!"'" ~ ANY)* }
+literal        = { character_literal | string_literal | number_literal | hexadecimal_literal }
+string_literal = { "'" ~ string_text ~ "'" }
+string_text    = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
 character_literal   = { "^" ~ ANY }
 number_literal      = { decimal_literal | binary_literal | octal_literal | hexadecimal_literal }
