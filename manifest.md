@@ -34,13 +34,13 @@ x val
 Mutable Uninitialized Variable Declaration:
 
 ```
-x var i32
+x int var
 ```
 
 Immutable Uninitialized Variable Declaration with Explicit Type:
 
 ```
-x val i32
+x int val
 ```
 
 **NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
@@ -60,7 +60,7 @@ x var 'hello'
 Immutable Variable Declaration Initialized with Literal Specifying Explicit Type:
 
 ```
-x val int 42
+x int val 42
 ```
 
 Mutable Variable Initialization with Explicit Type:
@@ -72,7 +72,11 @@ x val int 100
 Variable Initialization with Expression:
 
 ```
-x val = 2 + 2
+x val 2 + 2
+```
+
+```
+x val (2 * 3) + (4 / 2)
 ```
 
 Variable Initialization with Multiline Block Expression:
@@ -86,13 +90,13 @@ x val {
 Variable Initialization with Function Call:
 
 ```
-x val = myFunction
+x val myFunction
 ```
 
 Variable Initialization with Identifier:
 
 ```
-x val = y
+x val y
 ```
 
 # Operators
@@ -214,7 +218,7 @@ x val false
 Boolean Value in Assignment:
 
 ```
-x val bool = y
+x boo val y
 ```
 
 ### Numeric
@@ -236,11 +240,11 @@ y val -100_234
 Decimal in Literal Assignment:
 
 ```
-offsetX val f32 99.95
+offsetX dec val 99.95
 ```
 
 ```
-offsetY f64 -1_234.005
+offsetY dec val -1_234.005
 ```
 
 #### Hexadecimal

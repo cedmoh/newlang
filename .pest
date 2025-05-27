@@ -1,17 +1,6 @@
 program =  { SOI ~ body ~ EOI }
 body    = _{ expressions? }
 
-expressions = _{ (expression ~ newlines)+ }
-expression  = _{ block | declarations | chain | arithmetic_expression | literal }
-
-declarations = _{ (declaration ~ newlines)+ }
-declaration  = _{ var_declaration | fn_declaration }
-
-// Identifiers
-// TODO: can we allow identifiers to start with numbers if we exclude all number literals?
-// identifier = @{ !number_literal ~ ASCII_ALPHANUMERIC+ }
-identifier = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
-
 // Keywords
 var     = @{ "var" }
 val     = @{ "val" }
@@ -20,6 +9,7 @@ false   = @{ "false" }
 fn      = @{ "fn" }
 ret     = @{ "ret" }
 do      = @{ "do" }
+not     = @{ "not" }
 keyword =  { var | val | true | false | fn | ret | do }
 
 // Operators
@@ -29,6 +19,27 @@ subtraction    = @{ "-" }
 multiplication = @{ "*" }
 division       = @{ "/" }
 
+// Expression
+expressions = _{ (expression ~ newlines)+ }
+expression  = _{ monadic_expression | diadic_expression | evaluation }
+
+evaluation         = { block | declarations | chain | literal }
+monadic_operator   = { subtraction ~ not }
+monadic_expression = { monadic_operator ~ expression }
+diadic_operator    = { addition | subtraction | multiplication | division }
+// every possible expression except another diadic
+diadic_first_expression  = { monadic_expression | evaluation }
+diadic_expression  = { diadic_first_expression ~ (diadic_operator ~ expression)* }
+
+// Declarations
+declarations = _{ (declaration ~ newlines)+ }
+declaration  = _{ var_declaration | fn_declaration }
+
+// Identifiers
+// TODO: can we allow identifiers to start with numbers if we exclude all number literals?
+// identifier = @{ !number_literal ~ ASCII_ALPHANUMERIC+ }
+identifier = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+
 // Blocks
 block = { "{" ~ newlines ~ expressions? ~ newlines ~ "}" }
 
@@ -36,32 +47,28 @@ block = { "{" ~ newlines ~ expressions? ~ newlines ~ "}" }
 // this is evaluated to either a function call or a variable access
 chain = { identifier ~ (expression ~ ","?)* }
 
-fn_declaration =  { identifier ~ fn ~ fn_args? ~ fn_body? }
-fn_body        =  { fn_block | fn_dos }
+fn_declaration =  { fn_name ~ fn_type? ~ fn ~ fn_args? ~ fn_body? }
+fn_name        =  { identifier }
+fn_type        =  { identifier }
+fn_body        =  { fn_block }
 fn_block       =  { "{" ~ newlines ~ (expressions | ret)* ~ newlines ~ "}" }
-fn_dos         =  { (fn_do)+ }
-fn_do          =  { do ~ expression }
 fn_args        =  { "("? ~ fn_arg? ~ ("," ~ fn_arg)* ~ ")"? }
 fn_arg         =  { arg_name ~ (":"? ~ arg_type)? }
 arg_name       = @{ identifier }
 arg_type       = @{ identifier }
 
 // Variables
-var_declaration = _{ assignment_var_declaration | literal_var_declaration | block_var_declaration | uninitialized_var_declaration }
+var_declaration = _{ literal_var_declaration | assignment_var_declaration | block_var_declaration | uninitialized_var_declaration }
 
 var_name   = @{ identifier }
 var_type   = @{ identifier }
 val_or_var = @{ var | val }
 
-var_nomination                = { var_name ~ val_or_var ~ var_type? }
+var_nomination                = { var_name ~ var_type? ~ val_or_var }
 uninitialized_var_declaration = { var_nomination }
 block_var_declaration         = { var_nomination ~ block }
 literal_var_declaration       = { var_nomination ~ literal }
-assignment_var_declaration    = { var_nomination ~ assignment ~ expression }
-
-// Arithmetic Expression
-arithmetic_operator   = { addition | subtraction | multiplication | division }
-arithmetic_expression = { (literal ~ arithmetic_operator)+ ~ literal }
+assignment_var_declaration    = { var_nomination ~ assignment? ~ expression }
 
 // Literals
 literal        = { character_literal | string_literal | number_literal | hexadecimal_literal }
