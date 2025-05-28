@@ -374,7 +374,13 @@ Tuple Literal with Literals of Different Types:
 Tuple Literal with Evaluated Members:
 
 ```
-(2 + 2, sine 10, width)
+(2 + 2, sine(10), width)
+```
+
+Tuple Literal with Function Call as Member:
+
+```
+(myFunction(param1, param2), myFunction2(param1))
 ```
 
 Tuple Literal with Nested Tuples:
@@ -399,6 +405,18 @@ Tuple Literal with Named Fields and Nested Tuples:
 
 ```
 (size, (width 100, height 200), zIndex 1)
+```
+
+Tuple Literal with Named Fields and Function Call:
+
+```
+(width {getWidth square}, height {getHeight square})
+```
+
+Tuple Literal with Named Fields and Expression:
+
+```
+(class if getIsVisible() { 'visible' } else { 'hidden' },)
 ```
 
 #### Access in Expression

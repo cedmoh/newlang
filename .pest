@@ -19,6 +19,7 @@ if      = @{ "if" }
 elsif   = @{ "elsif" }
 else    = @{ "else" }
 match   = @{ "match" }
+cite    = @{ "cite" }
 keyword =  {
     var
   | val
@@ -37,6 +38,7 @@ keyword =  {
   | elsif
   | else
   | match
+  | cite
 }
 
 // Operators
@@ -48,11 +50,22 @@ division       = @{ "/" }
 
 // Expression
 expressions         = _{ (expression ~ newlines)+ }
-expression          = _{ evaluation }
+expression          =  { evaluation }
 broken_expression   =  { br ~ expression }
 returned_expression =  { ret ~ expression }
 
-evaluation         = { block | declarations | loop_block | if_chain | chain | literal }
+evaluation         = {
+    block
+  | declarations
+  | loop_block
+  | if_chain
+  | match_expression
+  | cited_identifier // TODO: path and chain have overlap and fight for priority, combine into one rule
+
+  | chain
+  | path
+  | literal
+}
 monadic_operator   = { subtraction ~ not }
 monadic_expression = { monadic_operator ~ expression }
 diadic_operator    = { addition | subtraction | multiplication | division }
@@ -67,16 +80,17 @@ declaration  = _{ var_declaration | fn_declaration }
 // Identifiers
 // TODO: can we allow identifiers to start with numbers if we exclude all number literals?
 // identifier = @{ !number_literal ~ ASCII_ALPHANUMERIC+ }
-identifier = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+identifier       = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+cited_identifier =  { cite ~ identifier }
 
 // Blocks
-block = {
-    "{" ~ newlines ~ ((broken_expression | returned_expression | cont | expression) ~ newlines)* ~ newlines ~ "}"
-}
+block         = { "{" ~ newlines ~ block_content ~ newlines ~ "}" }
+block_content = { ((broken_expression | returned_expression | cont | expression) ~ newlines)* }
 
 // Functions
 // this is evaluated to either a function call or a variable access
-chain = { identifier ~ (expression ~ ","?)* }
+chain      = { identifier ~ "("? ~ chain_body ~ ")"? }
+chain_body = { (expression ~ ","?)* }
 
 fn_declaration =  { fn_name ~ fn_type? ~ fn ~ fn_args? ~ fn_body? }
 fn_name        =  { identifier }
@@ -89,7 +103,12 @@ arg_name       = @{ identifier }
 arg_type       = @{ identifier }
 
 // Variables
-var_declaration = _{ literal_var_declaration | assignment_var_declaration | block_var_declaration | uninitialized_var_declaration }
+var_declaration = _{
+    literal_var_declaration
+  | assignment_var_declaration
+  | block_var_declaration
+  | uninitialized_var_declaration
+}
 
 var_name   = @{ identifier }
 var_type   = @{ identifier }
@@ -101,8 +120,16 @@ block_var_declaration         = { var_nomination ~ block }
 literal_var_declaration       = { var_nomination ~ literal }
 assignment_var_declaration    = { var_nomination ~ assignment? ~ expression }
 
+// Paths
+path            = { identifier ~ (path_member)* }
+path_member     = { path_chain | path_identifier | path_number | path_index }
+path_identifier = { "." ~ identifier }
+path_chain      = { "." ~ chain }
+path_number     = { "." ~ (ASCII_DIGIT)+ }
+path_index      = { "[" ~ expression ~ "]" }
+
 // Literals
-literal        = { boolean_literal | character_literal | string_literal | number_literal | hexadecimal_literal }
+literal        = { tuple_literal | boolean_literal | character_literal | string_literal | number_literal | hexadecimal_literal }
 string_literal = { "'" ~ string_text ~ "'" }
 string_text    = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
@@ -113,18 +140,46 @@ hexadecimal_literal = { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
 binary_literal      = { "b" ~ ('0'..'1' | "_")+ }
 octal_literal       = { "o" ~ ('0'..'7' | "_")+ }
 boolean_literal     = { true | false }
+tuple_literal       = {
+    "(" ~ newlines ~ (tuple_term ~ ",")+ ~ (tuple_term ~ ","?)? ~ newlines ~ ")"
+}
+tuple_term          = { named_tuple_term | unnamed_tuple_term }
+named_tuple_term    = { identifier ~ expression }
+unnamed_tuple_term  = { expression }
 
 // If
 if_chain    = { if_block ~ newlines ~ (elsif_block ~ newlines)* ~ else_block? }
-if_block    = { if ~ expression ~ NEWLINE? ~ block }
-elsif_block = { elsif ~ expression ~ NEWLINE? ~ block }
-else_block  = { else ~ NEWLINE? ~ block }
+if_block    = { if ~ "("? ~ expression ~ ")"? ~ newlines ~ block }
+elsif_block = { elsif ~ "("? ~ expression ~ ")"? ~ newlines ~ block }
+else_block  = { else ~ newlines ~ block }
+
+// Pattern
+pattern               =  {
+    array_pattern
+  | destructuring_pattern
+  | tuple_pattern
+  | var_pattern
+}
+wildcard              =  { "_" }
+rest                  =  { ".." }
+rest_term             = @{ rest ~ identifier? }
+pattern_term          =  { identifier | wildcard }
+var_pattern           =  { pattern_term }
+tuple_pattern         =  { (pattern_term) ~ ("," ~ pattern_term)+ }
+array_pattern         =  { "[" ~ (pattern_term | rest_term) ~ ("," ~ (pattern_term | rest_term)) ~ "]" }
+destructuring_pattern =  { "{" ~ (pattern_term | rest_term) ~ ("," ~ (pattern_term | rest_term))+ ~ "}" }
+
+// Match
+match_expression = { match ~ match_term ~ match_block }
+match_term       = { expression ~ ("," ~ expression)* }
+match_block      = { "{" ~ newlines ~ (match_arm ~ "," ~ newlines)* ~ (match_arm ~ ","?)? ~ newlines ~ "}" }
+match_arm        = { pattern ~ do ~ expression }
 
 // Loop
 loop_block = { loop ~ NEWLINE? ~ block }
 
 // Comments
-COMMENT             = ${ !hexadecimal_literal ~ (multi_comment | inline_comment | single_comment) ~ newlines }
+COMMENT             = _{ !hexadecimal_literal ~ (multi_comment | inline_comment | single_comment) ~ newlines }
 single_comment_body =  { (!NEWLINE ~ ANY)* }
 single_comment      =  { !"###" ~ !"##" ~ "#" ~ single_comment_body? }
 multi_comment_body  =  { (!"###" ~ ANY)* }
