@@ -421,7 +421,7 @@ Tuple Pattern Matching Arm:
 
 ```
 match myTuple {
-    x, y, z do todo
+    x, y, z do todo,
 }
 ```
 
@@ -429,7 +429,7 @@ Tuple Pattern Matching Target:
 
 ```
 match x, y {
-  _ do todo
+  _ do todo,
 }
 ```
 
@@ -513,6 +513,49 @@ myMatrix | 1, 2, 3 |
 
 ```
 myMatrix[0, 1]
+```
+
+# Blocks
+
+Block with Empty Body:
+
+```
+{}
+```
+
+Block with Function Call:
+
+```
+{
+  print 'Hello, World!'
+}
+```
+
+Saving Block Result to Variable:
+
+```
+result val
+  {
+    'result'
+  }
+```
+
+Breaking Out of a Block:
+
+```
+{
+  if true { br }
+  print 'This will never run'
+}
+```
+
+Saving Block Result with Break Condition to Variable:
+
+```
+result val
+  {
+    if true { br 'Result' }
+  }
 ```
 
 # Functions
@@ -738,4 +781,266 @@ myEnum enum {
   Variant(width u32, height u32)
   AnotherVariant(string number)
 }
+```
+
+# Control Flow
+
+## If
+
+Single if Statement:
+
+```
+if true {
+  print 'Executed!'
+}
+```
+
+if Statement with else Clause:
+
+```
+if false {
+  print 'Not executed :('
+} else {
+  print 'Executed!'
+}
+```
+
+if Statement with else-if Clause:
+
+```
+if false {
+  print 'Not executed :('
+}
+elsif true {
+  print 'Executed!'
+}
+```
+
+Result of if Statement Saving to Variable:
+
+```
+result val
+  if true { 'foo' }
+  else { 'bar' }
+```
+
+## Match
+
+Match Statement with Single Arm:
+
+```
+match myValue {
+  1 do print 'One',
+}
+```
+
+Match Statement with Multiple Arms:
+
+```
+match myValue {
+  1 do print 'One',
+  2 do print 'Two',
+}
+```
+
+Match Statement with Default Arm:
+
+```
+match myValue {
+  1 do print 'One',
+  2 do print 'Two',
+  _ do print 'Other',
+}
+```
+
+Match Statement with Pattern Matching:
+
+```
+match x, y {
+  0, 0 do print 'Both Zero',
+  1, 1 do print 'Both One',
+  _ do print 'Not the Same',
+}
+```
+
+Saving Match Result to Variable:
+
+```
+result val
+  match myValue {
+    true do 'Yes',
+    false do 'No',
+  }
+```
+
+## Loop
+
+Loop Statement:
+
+```
+loop {
+  print 'This will run forever!'
+}
+```
+
+Loop with Break Condition:
+
+```
+loop {
+  if true { br }
+  print 'This will never run'
+}
+```
+
+Loop with Continue Condition:
+
+```
+loop {
+  print 'Looping forever!'
+  if true { cont }
+  print 'This will never run'
+}
+```
+
+Saving Loop Result to Variable:
+
+```
+result val
+  loop {
+    br 'Result'
+  }
+```
+
+## While
+
+While Loop with Condition:
+
+```
+x var 0
+while x < 10 {
+  x += 1
+  print 'This will run forever until x reaches 10!'
+}
+```
+
+While Loop with Break Condition:
+
+```
+while true {
+  if true { br }
+  print 'This will never run'
+}
+```
+
+While Loop with Continue Condition:
+
+```
+while true {
+  print 'Looping forever!'
+  if true { cont }
+  print 'This will never run'
+}
+```
+
+Saving While Loop Result to Variable:
+
+```
+result val
+  while true {
+    br 'Result'
+  }
+```
+
+## For-In
+
+for-in Loop with Range:
+
+```
+for i in 0..10 {
+  print i
+}
+```
+
+for-in Loop with Array:
+
+```
+for item in [1, 2, 3, 4, 5] {
+  print item
+}
+```
+
+for-in Loop with Tuple:
+
+```
+for item in (1, 2, 3) {
+  print item
+}
+```
+
+for-in Loop with break Condition:
+
+```
+for item in array {
+  if item == 2 { br }
+  print item
+}
+```
+
+Saving for-in Loop Result to Variable:
+
+```
+result val
+  for item in array {
+    if item == 2 { br item }
+  }
+```
+
+## For
+
+Incrementing for Loop:
+
+```
+for i var 0, i < 10, inc i {
+  print i
+}
+```
+
+Decrementing for Loop:
+
+```
+for i var 10, i > 0, dec i {
+  print i
+}
+```
+
+Decrementing for Loop with Break Condition:
+
+```
+for i var 10, i > 0, dec i {
+  if i == 5 { br }
+  print i
+}
+```
+
+Saving for Loop Result to Variable:
+
+```
+result val
+  for i var 0, i < 10, inc i {
+    if i == 5 { br i }
+  }
+```
+
+## Pipe
+
+Pipe Operator for Function Call:
+
+```
+myFn pipe myOtherFn it
+```
+
+Pipe Operator for Function Call with Multiple Arguments:
+
+```
+10 pipe calculate it, it * 2
 ```
