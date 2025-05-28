@@ -10,7 +10,34 @@ fn      = @{ "fn" }
 ret     = @{ "ret" }
 do      = @{ "do" }
 not     = @{ "not" }
-keyword =  { var | val | true | false | fn | ret | do }
+for     = @{ "for" }
+while   = @{ "while" }
+loop    = @{ "loop" }
+br      = @{ "br" }
+cont    = @{ "cont" }
+if      = @{ "if" }
+elsif   = @{ "elsif" }
+else    = @{ "else" }
+match   = @{ "match" }
+keyword =  {
+    var
+  | val
+  | true
+  | false
+  | fn
+  | ret
+  | do
+  | not
+  | for
+  | while
+  | loop
+  | br
+  | cont
+  | if
+  | elsif
+  | else
+  | match
+}
 
 // Operators
 assignment     = @{ "=" }
@@ -20,16 +47,18 @@ multiplication = @{ "*" }
 division       = @{ "/" }
 
 // Expression
-expressions = _{ (expression ~ newlines)+ }
-expression  = _{ monadic_expression | diadic_expression | evaluation }
+expressions         = _{ (expression ~ newlines)+ }
+expression          = _{ evaluation }
+broken_expression   =  { br ~ expression }
+returned_expression =  { ret ~ expression }
 
-evaluation         = { block | declarations | chain | literal }
+evaluation         = { block | declarations | loop_block | if_chain | chain | literal }
 monadic_operator   = { subtraction ~ not }
 monadic_expression = { monadic_operator ~ expression }
 diadic_operator    = { addition | subtraction | multiplication | division }
 // every possible expression except another diadic
-diadic_first_expression  = { monadic_expression | evaluation }
-diadic_expression  = { diadic_first_expression ~ (diadic_operator ~ expression)* }
+diadic_first_expression = { monadic_expression | evaluation }
+diadic_expression       = { diadic_first_expression ~ (diadic_operator ~ expression)* }
 
 // Declarations
 declarations = _{ (declaration ~ newlines)+ }
@@ -41,7 +70,9 @@ declaration  = _{ var_declaration | fn_declaration }
 identifier = @{ !(number_literal | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 
 // Blocks
-block = { "{" ~ newlines ~ expressions? ~ newlines ~ "}" }
+block = {
+    "{" ~ newlines ~ ((broken_expression | returned_expression | cont | expression) ~ newlines)* ~ newlines ~ "}"
+}
 
 // Functions
 // this is evaluated to either a function call or a variable access
@@ -71,7 +102,7 @@ literal_var_declaration       = { var_nomination ~ literal }
 assignment_var_declaration    = { var_nomination ~ assignment? ~ expression }
 
 // Literals
-literal        = { character_literal | string_literal | number_literal | hexadecimal_literal }
+literal        = { boolean_literal | character_literal | string_literal | number_literal | hexadecimal_literal }
 string_literal = { "'" ~ string_text ~ "'" }
 string_text    = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
@@ -82,6 +113,15 @@ hexadecimal_literal = { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
 binary_literal      = { "b" ~ ('0'..'1' | "_")+ }
 octal_literal       = { "o" ~ ('0'..'7' | "_")+ }
 boolean_literal     = { true | false }
+
+// If
+if_chain    = { if_block ~ newlines ~ (elsif_block ~ newlines)* ~ else_block? }
+if_block    = { if ~ expression ~ NEWLINE? ~ block }
+elsif_block = { elsif ~ expression ~ NEWLINE? ~ block }
+else_block  = { else ~ NEWLINE? ~ block }
+
+// Loop
+loop_block = { loop ~ NEWLINE? ~ block }
 
 // Comments
 COMMENT             = ${ !hexadecimal_literal ~ (multi_comment | inline_comment | single_comment) ~ newlines }
