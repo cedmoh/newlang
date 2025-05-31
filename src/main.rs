@@ -2,45 +2,9 @@ use std::collections::HashMap;
 
 use pest::{
     Parser,
-    error::Error,
     iterators::{Pair, Pairs},
 };
 use pest_derive::Parser;
-
-mod parser;
-
-// WHITESPACE = _{ (" " | "\t" | "\r" | "\n")+ }
-// COMMENT    = _{ ("/*" ~ (!"*/" ~ ANY)* ~ "*/") | ("//" ~ (!"\n" ~ ANY)* ~ ("\n" | EOI)) }
-
-// zero      = _{ "0" }
-// nonZero   = _{ '1' .. '9' }
-// digit     = _{ (zero | nonZero)* }
-// natural   = @{ ( nonZero ~ digit?) | zero }
-// name      = @{ ('a'..'z')+ }
-
-// expr = {sum_expr}
-// sum_expr         =  {
-//     mul_expr ~ ("+" ~ sum_expr)*
-// }
-// mul_expr = {
-//     pow_expr ~ ("*" ~ mul_expr)*
-// }
-// pow_expr = {
-//     | (term ~ "^" )* ~ term
-
-// }
-
-// term = {
-// 	 call | natural | name | "(" ~ expr ~ ")"
-// }
-// call         = {
-
-//   name ~"(" ~ (expr ~("," ~ expr)*)? ~ ")"
-// }
-
-// program      =  { SOI ~ (expr ~ ("  ;" ~ expr)*) ~ EOI }
-
-struct Ast(Vec<Expr>);
 
 #[derive(Clone, Debug)]
 enum Expr {

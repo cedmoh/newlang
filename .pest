@@ -47,6 +47,7 @@ multiplication = @{ "*" }
 division       = @{ "/" }
 exponent       = @{ "^" }
 ops            =  {
+  
   | addition
   | subtraction
   | multiplication
@@ -59,11 +60,11 @@ xps         = _{ (xp ~ nls)+ }
 xp          = _{ lv0 }
 broken_xp   =  { br ~ xp? }
 returned_xp =  { ret ~ xp? }
-
-lv0 = { lv1 ~ (lv0_ops ~ lv0)? }
-lv1  = { lv2 ~ (lv1_ops ~ lv1)? }
-lv2  = { lv3 ~ (lv2_ops ~ lv2)? }
-lv3  = {
+lv0         =  { lv1 ~ (lv0_ops ~ lv0)? }
+lv1         =  { lv2 ~ (lv1_ops ~ lv1)? }
+lv2         =  { lv3 ~ (lv2_ops ~ lv2)? }
+lv3         =  {
+  
   | block
   | dls
   | loop_block
@@ -76,9 +77,9 @@ lv3  = {
   | lit
   | "(" ~ xp ~ ")"
 }
-lv0_ops = { addition | subtraction }
-lv1_ops = { multiplication | division }
-lv2_ops = { exponent }
+lv0_ops     =  { addition | subtraction }
+lv1_ops     =  { multiplication | division }
+lv2_ops     =  { exponent }
 
 // Paths
 member         = { member_subject ~ member_object }
@@ -120,7 +121,7 @@ fn_block         =  { "{" ~ nls ~ (xps | ret)* ~ nls ~ "}" }
 fn_generics      =  { "<" ~ fn_generic ~ ("," ~ fn_generic)* ~ ">" }
 fn_generic       =  { generic_name ~ generic_bounds? }
 generic_name     = @{ identifier }
-generic_bounds   =  { generic_bound ~ ("+" ~ generic_bound) }
+generic_bounds   =  { generic_bound ~ ("+" ~ generic_bound)* }
 generic_bound    = @{ identifier }
 fn_args          =  { "("? ~ nls ~ fn_arg? ~ nls ~ (nls ~ "," ~ nls ~ fn_arg)* ~ nls ~ ")"? }
 fn_arg           =  { arg_name ~ (":"? ~ arg_type)? }
@@ -147,8 +148,18 @@ block_var_dl         = { var_nomination ~ block }
 lit_var_dl           = { var_nomination ~ lit }
 assignment_var_dl    = { var_nomination ~ assignment? ~ xp }
 
-// lits
-lit         = { array_lit | tuple_lit | boolean_lit | character_lit | string_lit | number_lit | hexadecimal_lit }
+// Literals 
+lit         = {
+    array_lit
+  | tuple_lit
+  | boolean_lit
+  | character_lit
+  | string_lit
+  | number_lit
+  | hexadecimal_lit
+  | binary_lit
+  | octal_lit
+}
 string_lit  = { "'" ~ string_text ~ "'" }
 string_text = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
