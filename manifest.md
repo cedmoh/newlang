@@ -486,7 +486,7 @@ u8[16]
 Array Value in Literal Assignment:
 
 ```
-array [1, 2, 3, 4, 5]
+array val [1, 2, 3, 4, 5]
 ```
 
 #### Pattern Matching
@@ -523,9 +523,12 @@ i32[16 16]
 
 #### Value in Literal Assignment:
 
-myMatrix | 1, 2, 3 |
+```
+myMatrix
+| 1, 2, 3 |
 | 4, 5, 6 |
 | 7, 8, 9 |
+```
 
 #### Access in Expression
 
@@ -590,18 +593,6 @@ myFunction fn
 myFunction fn {}
 ```
 
-Function Declaration with Single Line Body:
-
-```
-myFunction fn do print 'Hello!'
-```
-
-Function Declaration with Multiple Lines Defined Using `do`:
-
-```
-myFunction fn do print 'Hello' do print 'World!'
-```
-
 Function with a return value
 
 ```
@@ -663,7 +654,7 @@ myFunction fn<T TypeConstraint + AnotherTypeConstraint, U> arg {}
 Function Call with No Arguments:
 
 ```
-myFunction
+myFunction()
 ```
 
 Function Call with one Parameter:
