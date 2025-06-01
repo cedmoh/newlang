@@ -192,7 +192,7 @@ pub struct FunctionParameter {
     pub ty: Option<Type>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct FunctionParameters {
     pub items: Vec<FunctionParameter>,
 }
@@ -203,7 +203,7 @@ pub struct GenericParameter {
     pub bounds: Option<Vec<String>>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct FunctionGenericParameters {
     pub items: Vec<GenericParameter>,
 }
@@ -217,8 +217,8 @@ pub struct FunctionBody {
 pub struct FunctionDeclaration {
     pub name: Identifier,
     pub ty: Option<Type>,
-    pub generic_params: Option<FunctionGenericParameters>,
-    pub params: Option<FunctionParameters>,
+    pub generic_params: FunctionGenericParameters,
+    pub params: FunctionParameters,
     pub ret_ty: Option<Type>,
     pub body: Option<FunctionBody>,
 }

@@ -119,7 +119,84 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
             })
         }
         Rule::fn_dl => {
-            todo!()
+            let mut inner = pair.into_inner();
+            let name = Identifier::from(inner.next().expect("Expected function name").as_str());
+
+            let mut ty = None;
+            let mut generics = FunctionGenericParameters::default();
+            let mut params = FunctionParameters::default();
+            let mut ret_ty = None;
+            let mut body = None;
+
+            while let Some(inner_pair) = inner.next() {
+                match inner_pair.as_rule() {
+                    Rule::fn_type => {
+                        ty = Some(Type::from(inner_pair.as_str()));
+                    }
+                    Rule::fn_generics => {
+                        generics.items = inner_pair
+                            .into_inner()
+                            .map(|generic| {
+                                let mut generic_inner = generic.into_inner();
+                                let name = Identifier::from(
+                                    generic_inner
+                                        .next()
+                                        .expect("Expected generic name")
+                                        .as_str(),
+                                );
+                                let bounds = generic_inner.next().map(|bounds| {
+                                    bounds
+                                        .into_inner()
+                                        .map(|b| b.as_str().to_string())
+                                        .collect()
+                                });
+                                GenericParameter { name, bounds }
+                            })
+                            .collect();
+                    }
+                    Rule::fn_args => {
+                        params.items = inner_pair
+                            .into_inner()
+                            .map(|arg| {
+                                let mut arg_inner = arg.into_inner();
+                                let name = Identifier::from(
+                                    arg_inner.next().expect("Expected argument name").as_str(),
+                                );
+                                let ty = arg_inner.next().map(|ty| Type::from(ty.as_str()));
+                                FunctionParameter { name, ty }
+                            })
+                            .collect();
+                    }
+                    Rule::fn_return => {
+                        ret_ty = inner_pair
+                            .into_inner()
+                            .next()
+                            .map(|ty| Type::from(ty.as_str()));
+                    }
+                    Rule::fn_block => {
+                        body = Some(FunctionBody {
+                            body: make_block(
+                                inner_pair.into_inner().next().expect("Expected block"),
+                            ),
+                        });
+                    }
+                    _ => {
+                        panic!(
+                            "Unexpected rule in function declaration: {:?}",
+                            inner_pair.as_rule()
+                        );
+                    }
+                }
+            }
+
+            Declaration::FunctionDeclaration(FunctionDeclaration {
+                name,
+                ty,
+                generic_params: generics,
+                params: params,
+                ret_ty: ret_ty,
+                body: body,
+            })
         }
         _ => {
             unreachable!(
@@ -427,6 +504,52 @@ mod tests {
                         }
                     ]
                 })]
+            }
+        );
+    }
+
+    #[test]
+    fn function_declaration() {
+        let input = "myFunction MyFunctionType fn<Generic1, Generic2> param1 Param1Type, param2 Param2Type -> ReturnType {}";
+        let ast = parse_program(input);
+
+        assert_eq!(
+            ast,
+            Ast {
+                body: vec![Expression::Declaration(Declaration::FunctionDeclaration(
+                    FunctionDeclaration {
+                        name: Identifier::from("myFunction"),
+                        ty: Some(Type::from("MyFunctionType")),
+                        generic_params: FunctionGenericParameters {
+                            items: vec![
+                                GenericParameter {
+                                    name: Identifier::from("Generic1"),
+                                    bounds: None
+                                },
+                                GenericParameter {
+                                    name: Identifier::from("Generic2"),
+                                    bounds: None
+                                }
+                            ]
+                        },
+                        params: FunctionParameters {
+                            items: vec![
+                                FunctionParameter {
+                                    name: Identifier::from("param1"),
+                                    ty: Some(Type::from("Param1Type"))
+                                },
+                                FunctionParameter {
+                                    name: Identifier::from("param2"),
+                                    ty: Some(Type::from("Param2Type"))
+                                }
+                            ]
+                        },
+                        ret_ty: Some(Type::from("ReturnType")),
+                        body: Some(FunctionBody {
+                            body: Block { body: vec![] }
+                        })
+                    }
+                ))]
             }
         );
     }
