@@ -1,11 +1,18 @@
 use pest::iterators::Pair;
 
-use crate::ast::{
-    Ast, BooleanLiteral, DecimalLiteral, Dyadic, DyadicOperator, Expression, Identifier, Literal,
-    StringLiteral,
-};
+use crate::ast::*;
 
 use crate::rules::{Rule, parse_rules};
+
+pub fn make_block(pair: Pair<Rule>) -> Block {
+    let Rule::block = pair.as_rule() else {
+        panic!("Expected a block, found: {:?}", pair.as_rule());
+    };
+
+    let body: Vec<Expression> = pair.into_inner().map(make_expression).collect();
+
+    Block { body }
+}
 
 pub fn make_literal(pair: Pair<Rule>) -> Literal {
     match pair.as_rule() {
@@ -17,7 +24,14 @@ pub fn make_literal(pair: Pair<Rule>) -> Literal {
         }
         Rule::character_lit => todo!(),
         Rule::string_lit => {
-            let string_value = pair.as_str().to_string();
+            let string_value = pair
+                .into_inner()
+                .next()
+                .expect("Expected string content")
+                .as_str()
+                .trim()
+                .to_string();
+
             Literal::String(StringLiteral {
                 value: string_value,
             })
@@ -59,6 +73,63 @@ pub fn make_dyadic_operator(pair: Pair<Rule>) -> DyadicOperator {
     }
 }
 
+pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
+    match pair.as_rule() {
+        Rule::var_dl => {
+            let mut inner = pair.into_inner();
+
+            let mut name = Identifier::from("unnamed");
+            let mut ty = None;
+            let mut is_readonly = true;
+            let mut initial_value = None;
+
+            while let Some(inner_pair) = inner.next() {
+                match inner_pair.as_rule() {
+                    Rule::var_name => {
+                        name = Identifier::from(inner_pair.as_str());
+                    }
+                    Rule::var_type => {
+                        ty = Some(Type::from(inner_pair.as_str()));
+                    }
+                    Rule::val_or_var => {
+                        is_readonly = inner_pair.as_str() == "val";
+                    }
+                    Rule::var_initial => {
+                        initial_value = Some(Box::new(make_expression(
+                            inner_pair
+                                .into_inner()
+                                .next()
+                                .expect("Expected an expression for initial value"),
+                        )));
+                    }
+                    _ => {
+                        panic!(
+                            "Unexpected rule in variable declaration: {:?}",
+                            inner_pair.as_rule()
+                        );
+                    }
+                }
+            }
+
+            Declaration::VariableDeclaration(VariableDeclaration {
+                name,
+                ty,
+                is_readonly,
+                initial_value,
+            })
+        }
+        Rule::fn_dl => {
+            todo!()
+        }
+        _ => {
+            unreachable!(
+                "Expected a variable or function declaration, found: {:?}",
+                pair.as_rule()
+            );
+        }
+    }
+}
+
 pub fn make_expression(pair: Pair<Rule>) -> Expression {
     match pair.as_rule() {
         Rule::lv0 | Rule::lv1 | Rule::lv2 | Rule::lv3 => {
@@ -89,11 +160,14 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                 in_lv
             );
         }
-        Rule::block => {
-            todo!()
+        Rule::block_content => {
+            unreachable!("block_content was assumed to be silenced.")
         }
-        Rule::dls => {
-            todo!()
+        Rule::block => {
+            let body: Vec<Expression> =
+                pair.into_inner().into_iter().map(make_expression).collect();
+
+            Expression::Block(Block { body })
         }
         Rule::loop_block => {
             todo!()
@@ -101,9 +175,63 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         Rule::while_block => {
             todo!()
         }
-        Rule::if_chain => {
-            todo!()
+        Rule::if_condition => {
+            let mut inner = pair.into_inner();
+            make_expression(
+                inner
+                    .next()
+                    .expect("Expected an expression in if_condition"),
+            )
         }
+        Rule::if_seg | Rule::elsif_seg | Rule::else_seg => {
+            unreachable!("if_seg, elsif_seg, and else_seg were assumed to be silenced.");
+        }
+        Rule::if_chain => Expression::IfChain(IfChain {
+            branches: pair
+                .into_inner()
+                .map(|branch| match branch.as_rule() {
+                    Rule::if_seg => {
+                        let mut inner = branch.into_inner();
+
+                        let condition = inner.next().expect("Expected a condition in if_seg");
+                        let body = inner.next().expect("Expected a body in if_seg");
+
+                        let condition_expr = make_expression(condition);
+                        let body_expr = make_block(body);
+
+                        IfBranch::If {
+                            condition: Box::new(condition_expr),
+                            body: body_expr,
+                        }
+                    }
+                    Rule::elsif_seg => {
+                        let mut inner = branch.into_inner();
+
+                        let condition = inner.next().expect("Expected a condition in elsif_seg");
+                        let body = inner.next().expect("Expected a body in elsif_seg");
+
+                        let condition_expr = make_expression(condition);
+                        let body_expr = make_block(body);
+
+                        IfBranch::ElseIf {
+                            condition: Box::new(condition_expr),
+                            body: body_expr,
+                        }
+                    }
+                    Rule::else_seg => {
+                        let body = branch
+                            .into_inner()
+                            .next()
+                            .expect("Expected a body in else_seg");
+
+                        let body_expr = make_block(body);
+
+                        IfBranch::Else { body: body_expr }
+                    }
+                    _ => panic!("Unexpected rule in if_chain: {:?}", branch.as_rule()),
+                })
+                .collect(),
+        }),
         Rule::match_xp => {
             todo!()
         }
@@ -129,6 +257,12 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
 
             make_expression(first)
         }
+        Rule::dls => {
+            unreachable!("dls was assumed to be silenced.");
+        }
+        Rule::dl => Expression::Declaration(make_declaration(
+            pair.into_inner().next().expect("Expected a declaration"),
+        )),
         _ => {
             panic!("Unexpected rule for expression: {:?}", pair.as_rule());
         }
@@ -225,6 +359,73 @@ mod tests {
                             value: 30.0
                         })))
                     }))
+                })]
+            }
+        );
+    }
+
+    #[test]
+    fn variable_declaration() {
+        let input = "myVariable MyType var 'initial'";
+        let ast = parse_program(input);
+
+        assert_eq!(
+            ast,
+            Ast {
+                body: vec![Expression::Declaration(Declaration::VariableDeclaration(
+                    VariableDeclaration {
+                        name: Identifier::from("myVariable"),
+                        ty: Some(Type::from("MyType")),
+                        is_readonly: false,
+                        initial_value: Some(Box::new(Expression::Literal(Literal::String(
+                            StringLiteral {
+                                value: "initial".to_string()
+                            }
+                        ))))
+                    }
+                ))]
+            }
+        );
+    }
+
+    #[test]
+    fn if_chain() {
+        let input = "if true { 1 } elsif false { 2 } else { 3 }";
+        let ast = parse_program(input);
+
+        assert_eq!(
+            ast,
+            Ast {
+                body: vec![Expression::IfChain(IfChain {
+                    branches: vec![
+                        IfBranch::If {
+                            condition: Box::new(Expression::Literal(Literal::Boolean(
+                                BooleanLiteral { value: true }
+                            ))),
+                            body: Block {
+                                body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
+                                    value: 1.0
+                                }))]
+                            }
+                        },
+                        IfBranch::ElseIf {
+                            condition: Box::new(Expression::Literal(Literal::Boolean(
+                                BooleanLiteral { value: false }
+                            ))),
+                            body: Block {
+                                body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
+                                    value: 2.0
+                                }))]
+                            }
+                        },
+                        IfBranch::Else {
+                            body: Block {
+                                body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
+                                    value: 3.0
+                                }))]
+                            }
+                        }
+                    ]
                 })]
             }
         );

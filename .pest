@@ -15,9 +15,9 @@ while   = @{ "while" }
 loop    = @{ "loop" }
 br      = @{ "br" }
 cont    = @{ "cont" }
-if      = @{ "if" }
-elsif   = @{ "elsif" }
-else    = @{ "else" }
+if      = _{ "if" }
+elsif   = _{ "elsif" }
+else    = _{ "else" }
 match   = @{ "match" }
 keyword =  {
     var
@@ -98,7 +98,7 @@ call_arguments =  { xp ~ ("," ~ xp)? }
 
 // Declarations
 dls = _{ (dl ~ nls)+ }
-dl  = _{ var_dl | fn_dl }
+dl  =  { var_dl | fn_dl }
 
 // Identifiers
 // TODO: can we allow identifiers to start with numbers if we exclude all number lits?
@@ -106,8 +106,8 @@ dl  = _{ var_dl | fn_dl }
 identifier = @{ !(number_lit | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 
 // Blocks
-block         = { "{" ~ nls ~ block_content ~ nls ~ "}" }
-block_content = { ((broken_xp | returned_xp | cont | xp) ~ nls)* }
+block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }
+block_content = _{ ((broken_xp | returned_xp | cont | xp) ~ nls)* }
 
 fn_dl            =  { fn_decorators? ~ fn_name ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_body? }
 fn_decorators    =  { fn_decorator+ }
@@ -131,22 +131,12 @@ arg_name         = @{ identifier }
 arg_type         = @{ identifier }
 
 // Variables
-var_dl = _{
-    lit_var_dl
-  | assignment_var_dl
-  | block_var_dl
-  | uninitialized_var_dl
-}
-
-var_name   = @{ identifier }
-var_type   = @{ identifier }
-val_or_var = @{ var | val }
-
-var_nomination       = { var_name ~ var_type? ~ val_or_var }
-uninitialized_var_dl = { var_nomination }
-block_var_dl         = { var_nomination ~ block }
-lit_var_dl           = { var_nomination ~ lit }
-assignment_var_dl    = { var_nomination ~ assignment? ~ xp }
+var_dl         =  { var_nomination ~ assignment? ~ var_initial }
+var_name       = @{ identifier }
+var_type       = @{ identifier }
+val_or_var     = @{ var | val }
+var_initial    =  { xp }
+var_nomination = _{ var_name ~ var_type? ~ val_or_var }
 
 // Literals
 lit         = {
@@ -177,10 +167,11 @@ unnamed_tuple_term =  { xp }
 array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 
 // If
-if_chain    = { if_block ~ nls ~ (elsif_block ~ nls)* ~ else_block? }
-if_block    = { if ~ "("? ~ xp ~ ")"? ~ nls ~ block }
-elsif_block = { elsif ~ "("? ~ xp ~ ")"? ~ nls ~ block }
-else_block  = { else ~ nls ~ block }
+if_chain     = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
+if_condition = { "("? ~ xp ~ ")"? }
+if_seg       = { if ~ if_condition ~ nls ~ block }
+elsif_seg    = { elsif ~ if_condition ~ nls ~ block }
+else_seg     = { else ~ nls ~ block }
 
 // Pattern
 pattern               = {
