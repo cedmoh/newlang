@@ -57,7 +57,7 @@ ops            =  {
 
 // Expressions
 xps         = _{ (xp ~ nls)+ }
-xp          = _{ lv0 }
+xp          =  { lv0 }
 broken_xp   =  { br ~ xp? }
 returned_xp =  { ret ~ xp? }
 lv0         =  { lv1 ~ (lv0_ops ~ lv0)? }
@@ -77,9 +77,9 @@ lv3         =  {
   | lit
   | "(" ~ xp ~ ")"
 }
-lv0_ops     =  { addition | subtraction }
-lv1_ops     =  { multiplication | division }
-lv2_ops     =  { exponent }
+lv0_ops     = _{ addition | subtraction }
+lv1_ops     = _{ multiplication | division }
+lv2_ops     = _{ exponent }
 
 // Paths
 member         = { member_subject ~ member_object }
@@ -148,7 +148,7 @@ block_var_dl         = { var_nomination ~ block }
 lit_var_dl           = { var_nomination ~ lit }
 assignment_var_dl    = { var_nomination ~ assignment? ~ xp }
 
-// Literals 
+// Literals
 lit         = {
     array_lit
   | tuple_lit
@@ -157,26 +157,24 @@ lit         = {
   | string_lit
   | number_lit
   | hexadecimal_lit
-  | binary_lit
-  | octal_lit
 }
 string_lit  = { "'" ~ string_text ~ "'" }
 string_text = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
-character_lit      = { "^" ~ ANY }
-number_lit         = { decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
-decimal_lit        = { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")*)? }
-hexadecimal_lit    = { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
-binary_lit         = { "b" ~ ('0'..'1' | "_")+ }
-octal_lit          = { "o" ~ ('0'..'7' | "_")+ }
-boolean_lit        = { true | false }
-tuple_lit          = {
+character_lit      =  { "^" ~ ANY }
+number_lit         = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
+decimal_lit        =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")*)? }
+hexadecimal_lit    =  { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
+binary_lit         =  { "b" ~ ('0'..'1' | "_")+ }
+octal_lit          =  { "o" ~ ('0'..'7' | "_")+ }
+boolean_lit        =  { true | false }
+tuple_lit          =  {
     !"()" ~ "(" ~ nls ~ (tuple_term ~ ",")+ ~ (tuple_term ~ ","?)? ~ nls ~ ")"
 }
-tuple_term         = { named_tuple_term | unnamed_tuple_term }
-named_tuple_term   = { identifier ~ xp }
-unnamed_tuple_term = { xp }
-array_lit          = { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
+tuple_term         =  { named_tuple_term | unnamed_tuple_term }
+named_tuple_term   =  { identifier ~ xp }
+unnamed_tuple_term =  { xp }
+array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 
 // If
 if_chain    = { if_block ~ nls ~ (elsif_block ~ nls)* ~ else_block? }
