@@ -59,7 +59,7 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
         Expression::Match(_match) => todo!(),
         Expression::Member(member) => todo!(),
         Expression::Call(call) => todo!(),
-        Expression::Identifier(identifier) => todo!(),
+        Expression::Identifier(identifier) => vars.0.get(&identifier.id).cloned(),
         Expression::Literal(literal) => match literal {
             Literal::Array => todo!(),
             Literal::Tuple => todo!(),
@@ -150,5 +150,47 @@ mod tests {
         );
 
         assert_eq!(evaluated, Some(Value::Number(4.0)))
+    }
+
+    #[test]
+    pub fn variable_declaration() {
+        let parsed = parse_program("myVar val 2");
+        let mut vars = Variables::default();
+        let mut fns = Functions::default();
+
+        evaluate(
+            parsed
+                .body
+                .into_iter()
+                .next()
+                .expect("Expected at least one expression"),
+            &mut vars,
+            &mut fns,
+        );
+
+        assert_eq!(vars.0.get("myVar").cloned(), Some(Value::Number(2.0)))
+    }
+
+    #[test]
+    pub fn add_variables() {
+        let parsed = parse_program(
+            // TODO: Fix parser so parenthesis are not needed
+            "(myVar val 42)
+             (myOtherVar val 23)
+             myVar + myOtherVar",
+        );
+
+        let mut vars = Variables::default();
+        let mut fns = Functions::default();
+
+        let result = parsed
+            .body
+            .into_iter()
+            .map(|xp| evaluate(xp, &mut vars, &mut fns));
+
+        assert_eq!(
+            result.into_iter().last().unwrap(),
+            Some(Value::Number(65.0))
+        )
     }
 }

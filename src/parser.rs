@@ -233,8 +233,9 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
             }
 
             panic!(
-                "Expected either a single expression or a binary operation in lv0, found: {:?}",
-                in_lv
+                "Expected either a single expression or a binary operation in lv0, found: {:?} {}",
+                in_lv,
+                in_lv.as_str()
             );
         }
         Rule::block_content => {
