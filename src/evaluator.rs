@@ -91,7 +91,7 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
                 },
                 DyadicOperator::Subtract => match (left, right) {
                     (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Number(left + right))
+                        Some(Value::Number(left - right))
                     }
                     _ => None,
                 },
@@ -123,6 +123,22 @@ mod tests {
     #[test]
     pub fn two_plus_two() {
         let parsed = parse_program("2+2");
+        let evaluated = evaluate(
+            parsed
+                .body
+                .into_iter()
+                .next()
+                .expect("Expected at least one expression"),
+            &mut Variables::default(),
+            &mut Functions::default(),
+        );
+
+        assert_eq!(evaluated, Some(Value::Number(4.0)))
+    }
+
+    #[test]
+    pub fn six_minus_two() {
+        let parsed = parse_program("6-2");
         let evaluated = evaluate(
             parsed
                 .body
