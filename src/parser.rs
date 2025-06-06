@@ -1,8 +1,20 @@
+use std::sync::LazyLock;
+
 use pest::iterators::Pair;
+use pest::pratt_parser::{Assoc, Op, PrattParser};
 
 use crate::ast::*;
 
 use crate::rules::{Rule, parse_rules};
+
+pub static PRATT_PARSER: LazyLock<PrattParser<Rule>> = LazyLock::new(|| {
+    use Assoc::{Left, Right};
+
+    PrattParser::new()
+        .op(Op::infix(Rule::addition, Left) | Op::infix(Rule::subtraction, Left))
+        .op(Op::infix(Rule::multiplication, Left) | Op::infix(Rule::subtraction, Left))
+        .op(Op::infix(Rule::exponent, Right))
+});
 
 pub fn make_block(pair: Pair<Rule>) -> Block {
     let Rule::block = pair.as_rule() else {
@@ -209,35 +221,6 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
 
 pub fn make_expression(pair: Pair<Rule>) -> Expression {
     match pair.as_rule() {
-        Rule::lv0 | Rule::lv1 | Rule::lv2 | Rule::lv3 => {
-            let mut in_lv = pair.into_inner().into_iter();
-            if in_lv.len() == 1 {
-                return make_expression(in_lv.into_iter().next().unwrap());
-            }
-
-            if in_lv.len() == 3 {
-                let first = in_lv.next().expect("Expected at least one expression");
-                let second = in_lv.next().expect("Expected a second expression");
-                let third = in_lv.next().expect("Expected a third expression");
-
-                // Assuming the first is an identifier, the second is an operator, and the third is a value
-                let left_hand = make_expression(first);
-                let operator = make_dyadic_operator(second);
-                let right_hand = make_expression(third);
-
-                return Expression::Dyadic(Dyadic {
-                    operator,
-                    left: Box::new(left_hand),
-                    right: Box::new(right_hand),
-                });
-            }
-
-            panic!(
-                "Expected either a single expression or a binary operation in lv0, found: {:?} {}",
-                in_lv,
-                in_lv.as_str()
-            );
-        }
         Rule::block_content => {
             unreachable!("block_content was assumed to be silenced.")
         }
@@ -317,8 +300,78 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
             todo!()
         }
         Rule::call => {
-            todo!()
+            let mut inner = pair.into_inner();
+
+            let first = inner.next().expect("Expected a callee in call");
+            let callee = if first.as_rule() == Rule::callee {
+                first.as_str().to_string()
+            } else {
+                panic!("Expected a callee in call, found: {:?}", first.as_rule());
+            };
+
+            let rest = inner
+                .next()
+                .expect("Expected call arguments or parens after callee");
+
+            let arguments = if rest.as_rule() == Rule::call_arguments {
+                rest.into_inner().map(make_expression).collect()
+            } else {
+                Vec::new()
+            };
+
+            Expression::Call(Call {
+                callee: Identifier { id: callee },
+                arguments: CallArguments { items: arguments },
+            })
         }
+        Rule::callee | Rule::call_arguments => {
+            unreachable!("callee and call_arguments assumed be handled in the call branch.");
+        }
+        Rule::op => {
+            unreachable!("op assumed to be silenced.");
+        }
+        Rule::operation => PRATT_PARSER
+            .map_primary(|primary| match primary.as_rule() {
+                Rule::operand => make_expression(
+                    primary
+                        .into_inner()
+                        .next()
+                        .expect("Expected an expression in operand"),
+                ),
+                _ => unreachable!(
+                    "Expected an expression in operation, found: {:?}",
+                    primary.as_rule()
+                ),
+            })
+            .map_infix(|lhs, op, rhs| match op.as_rule() {
+                Rule::addition => Expression::Dyadic(Dyadic {
+                    operator: make_dyadic_operator(op),
+                    left: Box::new(lhs),
+                    right: Box::new(rhs),
+                }),
+                Rule::subtraction => Expression::Dyadic(Dyadic {
+                    operator: make_dyadic_operator(op),
+                    left: Box::new(lhs),
+                    right: Box::new(rhs),
+                }),
+                Rule::multiplication => Expression::Dyadic(Dyadic {
+                    operator: make_dyadic_operator(op),
+                    left: Box::new(lhs),
+                    right: Box::new(rhs),
+                }),
+                Rule::division => Expression::Dyadic(Dyadic {
+                    operator: make_dyadic_operator(op),
+                    left: Box::new(lhs),
+                    right: Box::new(rhs),
+                }),
+                Rule::exponent => Expression::Dyadic(Dyadic {
+                    operator: make_dyadic_operator(op),
+                    left: Box::new(lhs),
+                    right: Box::new(rhs),
+                }),
+                _ => unreachable!(),
+            })
+            .parse(pair.into_inner()),
         Rule::identifier => {
             let id = pair.as_str().to_string();
             Expression::Identifier(Identifier { id })
@@ -385,12 +438,12 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
                     value: 5.0
                 })),]
-            }
+            },
+            ast,
         )
     }
 
@@ -400,7 +453,6 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::Dyadic(Dyadic {
                     operator: DyadicOperator::Add,
@@ -411,7 +463,8 @@ mod tests {
                         value: 2.0
                     })))
                 })]
-            }
+            },
+            ast,
         );
     }
 
@@ -420,8 +473,9 @@ mod tests {
         let input = "10 + 20 * 30";
         let ast = parse_program(input);
 
+        dbg!(ast.clone());
+
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::Dyadic(Dyadic {
                     operator: DyadicOperator::Add,
@@ -438,7 +492,8 @@ mod tests {
                         })))
                     }))
                 })]
-            }
+            },
+            ast
         );
     }
 
@@ -448,7 +503,6 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::Declaration(Declaration::VariableDeclaration(
                     VariableDeclaration {
@@ -462,7 +516,8 @@ mod tests {
                         ))))
                     }
                 ))]
-            }
+            },
+            ast,
         );
     }
 
@@ -472,7 +527,6 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::IfChain(IfChain {
                     branches: vec![
@@ -505,7 +559,8 @@ mod tests {
                         }
                     ]
                 })]
-            }
+            },
+            ast,
         );
     }
 
@@ -515,7 +570,6 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
-            ast,
             Ast {
                 body: vec![Expression::Declaration(Declaration::FunctionDeclaration(
                     FunctionDeclaration {
@@ -551,7 +605,8 @@ mod tests {
                         })
                     }
                 ))]
-            }
+            },
+            ast,
         );
     }
 }

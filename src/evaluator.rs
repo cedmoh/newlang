@@ -175,8 +175,8 @@ mod tests {
     pub fn add_variables() {
         let parsed = parse_program(
             // TODO: Fix parser so parenthesis are not needed
-            "(myVar val 42)
-             (myOtherVar val 23)
+            "myVar val 42
+             myOtherVar val 23)
              myVar + myOtherVar",
         );
 

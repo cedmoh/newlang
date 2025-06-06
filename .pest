@@ -46,7 +46,7 @@ subtraction    = @{ "-" }
 multiplication = @{ "*" }
 division       = @{ "/" }
 exponent       = @{ "^" }
-ops            =  {
+op             = _{
   
   | addition
   | subtraction
@@ -55,15 +55,14 @@ ops            =  {
   | exponent
 }
 
+// Operation
+operation =  { operand ~ (op ~ operand)+ }
+operand   =  { evaluation }
+
 // Expressions
 xps         = _{ (xp ~ nls)+ }
-xp          =  { lv0 }
-broken_xp   =  { br ~ xp? }
-returned_xp =  { ret ~ xp? }
-lv0         =  { lv1 ~ (lv0_ops ~ lv0)? }
-lv1         =  { lv2 ~ (lv1_ops ~ lv1)? }
-lv2         =  { lv3 ~ (lv2_ops ~ lv2)? }
-lv3         =  {
+xp          =  { operation | evaluation }
+evaluation  = _{
   
   | block
   | dls
@@ -77,9 +76,29 @@ lv3         =  {
   | lit
   | "(" ~ xp ~ ")"
 }
-lv0_ops     = _{ addition | subtraction }
-lv1_ops     = _{ multiplication | division }
-lv2_ops     = _{ exponent }
+broken_xp   =  { br ~ xp? }
+returned_xp =  { ret ~ xp? }
+// Level System is Unused
+lv0     =  { lv1 ~ (lv0_ops ~ lv0)? }
+lv1     =  { lv2 ~ (lv1_ops ~ lv1)? }
+lv2     =  { lv3 ~ (lv2_ops ~ lv2)? }
+lv3     =  {
+  
+  | block
+  | dls
+  | loop_block
+  | while_block
+  | if_chain
+  | match_xp
+  | member
+  | call
+  | identifier
+  | lit
+  | "(" ~ xp ~ ")"
+}
+lv0_ops = _{ addition | subtraction }
+lv1_ops = _{ multiplication | division }
+lv2_ops = _{ exponent }
 
 // Paths
 member         = { member_subject ~ member_object }
@@ -97,8 +116,8 @@ callee         = @{ identifier }
 call_arguments =  { xp ~ ("," ~ xp)? }
 
 // Declarations
-dls = _{ (dl ~ nls)+ }
-dl  =  { var_dl | fn_dl }
+dls = { (dl ~ nls)+ }
+dl  = { var_dl | fn_dl }
 
 // Identifiers
 // TODO: can we allow identifiers to start with numbers if we exclude all number lits?

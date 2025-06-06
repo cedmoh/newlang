@@ -120,8 +120,13 @@ impl<T: Into<String>> From<T> for Identifier {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Call {
-    pub callee: Box<Expression>,
-    pub arguments: Vec<Expression>,
+    pub callee: Identifier,
+    pub arguments: CallArguments,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CallArguments {
+    pub items: Vec<Expression>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
