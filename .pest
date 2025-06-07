@@ -56,8 +56,8 @@ op             = _{
 }
 
 // Operation
-operation =  { operand ~ (op ~ operand)+ }
-operand   =  { evaluation }
+operation = { operand ~ (op ~ operand)+ }
+operand   = { evaluation }
 
 // Expressions
 xps         = _{ (xp ~ nls)+ }
@@ -65,7 +65,7 @@ xp          =  { operation | evaluation }
 evaluation  = _{
   
   | block
-  | dls
+  | dl
   | loop_block
   | while_block
   | if_chain
@@ -85,7 +85,6 @@ lv2     =  { lv3 ~ (lv2_ops ~ lv2)? }
 lv3     =  {
   
   | block
-  | dls
   | loop_block
   | while_block
   | if_chain
@@ -115,9 +114,8 @@ generic_param  = @{ identifier }
 callee         = @{ identifier }
 call_arguments =  { xp ~ ("," ~ xp)? }
 
-// Declarations
-dls = { (dl ~ nls)+ }
-dl  = { var_dl | fn_dl }
+// Declaration
+dl = { var_dl | fn_dl }
 
 // Identifiers
 // TODO: can we allow identifiers to start with numbers if we exclude all number lits?

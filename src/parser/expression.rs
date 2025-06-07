@@ -176,9 +176,6 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
 
             make_expression(first)
         }
-        Rule::dls => {
-            unreachable!("dls was assumed to be silenced.");
-        }
         Rule::dl => Expression::Declaration(make_declaration(
             pair.into_inner().next().expect("Expected a declaration"),
         )),

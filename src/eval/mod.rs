@@ -166,7 +166,7 @@ mod tests {
         let parsed = parse_program(
             // TODO: Fix parser so parenthesis are not needed
             "myVar val 42
-             myOtherVar val 23)
+             myOtherVar val 23
              myVar + myOtherVar",
         );
 
