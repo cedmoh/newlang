@@ -1,3 +1,3 @@
 pub mod ast;
-pub mod evaluator;
+pub mod eval;
 pub mod parser;

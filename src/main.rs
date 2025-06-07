@@ -1,5 +1,5 @@
 use newlang::{
-    evaluator::{Functions, Variables, evaluate},
+    eval::{Functions, Variables, evaluate},
     parser::parse_program,
 };
 

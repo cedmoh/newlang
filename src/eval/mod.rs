@@ -1,21 +1,12 @@
-use std::collections::HashMap;
+mod functions;
+mod value;
+mod variables;
+
+pub use functions::*;
+pub use value::*;
+pub use variables::*;
 
 use crate::ast::*;
-
-#[derive(Debug, Clone, Default)]
-pub struct Variables(HashMap<String, Value>);
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Value {
-    Number(f64),
-    Boolean(bool),
-    Character(char),
-    String(String),
-    Nil,
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct Functions(HashMap<String, FunctionDeclaration>);
 
 pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Option<Value> {
     match xp {
@@ -114,10 +105,9 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        evaluator::{Functions, Value, Variables, evaluate},
-        parser::parse_program,
-    };
+    use crate::parser::parse_program;
+
+    use super::*;
     use pretty_assertions::assert_eq;
 
     #[test]
