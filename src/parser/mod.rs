@@ -9,7 +9,9 @@ mod rules;
 use crate::ast::*;
 
 pub fn parse_program(input: &str) -> Ast {
-    let mut pairs = rules::parse_rules(input).map_err(|_| ()).unwrap();
+    let mut pairs = rules::parse_rules(input)
+        .map_err(|_| ())
+        .expect("Could not parse rules.");
 
     let pair = pairs.next().expect("Expected a program");
 

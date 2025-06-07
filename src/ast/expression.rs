@@ -13,4 +13,16 @@ pub enum Expression {
     Identifier(Identifier),
     Literal(Literal),
     Dyadic(Dyadic),
+    Return(Return),
+    Break(Break),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Break {
+    pub xp: Option<Box<Expression>>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Return {
+    pub xp: Option<Box<Expression>>,
 }

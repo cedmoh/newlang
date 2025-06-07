@@ -90,26 +90,19 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         Rule::call => {
             let mut inner = pair.into_inner();
 
-            let first = inner.next().expect("Expected a callee in call");
-            let callee = if first.as_rule() == Rule::callee {
-                first.as_str().to_string()
-            } else {
-                panic!("Expected a callee in call, found: {:?}", first.as_rule());
-            };
-
-            let rest = inner
-                .next()
-                .expect("Expected call arguments or parens after callee");
-
-            let arguments = if rest.as_rule() == Rule::call_arguments {
-                rest.into_inner().map(make_expression).collect()
-            } else {
-                Vec::new()
-            };
-
             Expression::Call(Call {
-                callee: Identifier { id: callee },
-                arguments: CallArguments { items: arguments },
+                callee: Identifier {
+                    id: inner
+                        .next()
+                        .expect("Expected a callee in call")
+                        .as_str()
+                        .to_string(),
+                },
+                arguments: CallArguments {
+                    items: inner.next().map_or(Vec::new(), |args| {
+                        args.into_inner().map(make_expression).collect()
+                    }),
+                },
             })
         }
         Rule::callee | Rule::call_arguments => {
@@ -167,6 +160,14 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         Rule::lit => {
             let literal = make_literal(pair.into_inner().next().expect("Expected a literal"));
             Expression::Literal(literal)
+        }
+        Rule::returned_xp => {
+            let mut inner = pair.into_inner();
+            let _ret_keyword = inner.next().expect("Expected ret keyword");
+
+            Expression::Return(Return {
+                xp: inner.next().map(|f| Box::new(make_expression(f))),
+            })
         }
         Rule::xp => {
             let first = pair

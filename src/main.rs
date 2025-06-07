@@ -4,12 +4,24 @@ use newlang::{
 };
 
 fn main() {
-    let ast = parse_program("2+2");
-    let eval = evaluate(
-        ast.body.into_iter().next().unwrap(),
-        &mut Variables::default(),
-        &mut Functions::default(),
+    let ast = parse_program(
+        "myFunction fn {
+            myVariable val '5'
+            ret myVariable
+        }
+        
+        myFunction",
     );
 
-    println!("Result: {:?}", eval)
+    let mut vars = Variables::default();
+    let mut fns = Functions::default();
+
+    let eval = ast
+        .body
+        .into_iter()
+        .map(|ast| evaluate(ast, &mut vars, &mut fns))
+        .collect::<Vec<_>>();
+
+    println!("Result: {:#?}", eval);
+    println!("Functions: {:#?}", fns);
 }

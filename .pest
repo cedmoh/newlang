@@ -60,7 +60,7 @@ operation = { operand ~ (op ~ operand)+ }
 operand   = { evaluation }
 
 // Expressions
-xps         = _{ (xp ~ nls)+ }
+xps         = _{ (nls ~ xp ~ nls)+ }
 xp          =  { operation | evaluation }
 evaluation  = _{
   
