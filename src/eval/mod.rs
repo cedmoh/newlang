@@ -38,9 +38,9 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
         },
         Expression::Loop(_loop) => todo!(),
         Expression::While(_while) => todo!(),
-        Expression::IfChain(if_chain) => todo!(),
+        Expression::IfChain(_if_chain) => todo!(),
         Expression::Match(_match) => todo!(),
-        Expression::Member(member) => todo!(),
+        Expression::Member(_member) => todo!(),
         Expression::Call(call) => {
             let function = fns.get(&call.callee.id).expect(&format!(
                 "Function with the name {} does not exist.",

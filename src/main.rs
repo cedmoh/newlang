@@ -1,27 +1,18 @@
-use newlang::{
-    eval::{Functions, Variables, evaluate},
-    parser::parse_program,
-};
+use newlang::runner::run;
 
 fn main() {
-    let ast = parse_program(
-        "myFunction fn {
-            myVariable val '5'
+    let input = "
+        myFunction fn {
+            myVariable val 'hello' 
             ret myVariable
         }
         
-        myFunction",
-    );
+        myFunction
+    ";
 
-    let mut vars = Variables::default();
-    let mut fns = Functions::default();
-
-    let eval = ast
-        .body
-        .into_iter()
-        .map(|ast| evaluate(ast, &mut vars, &mut fns))
-        .collect::<Vec<_>>();
-
-    println!("Result: {:#?}", eval);
-    println!("Functions: {:#?}", fns);
+    match run(input) {
+        Ok(Some(val)) => println!("{}", val),
+        Ok(None) => println!(""),
+        Err(err) => eprintln!("{:?}", err),
+    }
 }
