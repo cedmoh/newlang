@@ -1,4 +1,4 @@
-use newlang::runner::run;
+use core::runner::run;
 
 fn main() {
     let input = "
