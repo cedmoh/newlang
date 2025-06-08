@@ -19,6 +19,7 @@ pub fn run(program: &str) -> Result<Option<Value>, ()> {
     let mut fns = Functions::default();
 
     let mut prelude = Prelude::default();
+
     prelude.insert(
         "print".to_string(),
         InternalFunction {

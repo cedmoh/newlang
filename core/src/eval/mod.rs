@@ -45,7 +45,27 @@ pub fn evaluate(
         },
         Expression::Loop(_loop) => todo!(),
         Expression::While(_while) => todo!(),
-        Expression::IfChain(_if_chain) => todo!(),
+        Expression::IfChain(if_chain) => {
+            for branch in if_chain.branches {
+                match branch {
+                    IfBranch::ElseIf { condition, body } | IfBranch::If { condition, body } => {
+                        let evaluated_condition = evaluate(*condition, vars, fns, prelude)
+                            .expect("Expected condition to evaluate to a value");
+
+                        let Value::Boolean(should_run) = evaluated_condition else {
+                            panic!("Expected condition to evaluate to boolean");
+                        };
+
+                        if should_run {
+                            return evaluate_many(body.body, vars, fns, prelude);
+                        }
+                    }
+                    IfBranch::Else { body } => return evaluate_many(body.body, vars, fns, prelude),
+                }
+            }
+
+            None
+        }
         Expression::Match(_match) => todo!(),
         Expression::Member(_member) => todo!(),
         Expression::Call(call) => {
