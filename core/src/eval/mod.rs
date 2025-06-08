@@ -1,25 +1,32 @@
 mod functions;
+mod prelude;
 mod value;
 mod variables;
 
 use std::iter::zip;
 
 pub use functions::*;
+pub use prelude::*;
 pub use value::*;
 pub use variables::*;
 
 use crate::ast::*;
 
-pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Option<Value> {
+pub fn evaluate(
+    xp: Expression,
+    vars: &mut Variables,
+    fns: &mut Functions,
+    prelude: &mut Prelude,
+) -> Option<Value> {
     match xp {
-        Expression::Block(block) => return evaluate_many(block.body, vars, fns),
+        Expression::Block(block) => return evaluate_many(block.body, vars, fns, prelude),
         Expression::Declaration(declaration) => match declaration {
             Declaration::VariableDeclaration(var_decl) => {
                 let name = var_decl.name.id.clone();
 
                 let value = var_decl
                     .initial_value
-                    .map(|expr| evaluate(*expr, vars, fns))
+                    .map(|expr| evaluate(*expr, vars, fns, prelude))
                     .flatten();
 
                 // TODO: Restore old value when scope is left
@@ -42,60 +49,31 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
         Expression::Match(_match) => todo!(),
         Expression::Member(_member) => todo!(),
         Expression::Call(call) => {
-            let function = fns.get(&call.callee.id).expect(&format!(
-                "Function with the name {} does not exist.",
-                call.callee.id
-            ));
-
-            let Some(function_body) = function.body.clone() else {
-                return None;
-            };
-
-            let expected_parameter_count = function.params.items.len();
-            let provided_parameter_count = call.arguments.items.len();
-            if expected_parameter_count != provided_parameter_count {
-                panic!(
-                    "Function {} expected {} parameters, got {} instead.",
-                    function.name.id, expected_parameter_count, provided_parameter_count
-                );
+            match (
+                fns.contains_key(&call.callee.id),
+                prelude.contains_key(&call.callee.id),
+            ) {
+                (true, _) => call_function(call, vars, fns, prelude),
+                (_, true) => call_native_function(call, vars, fns, prelude),
+                _ => panic!("Function with the name {} does not exist.", call.callee.id),
             }
-
-            // Evaluate provided params and add them to the scope.
-            // Save items of the scope with the same names as the params so they can be to_be_restored
-            // after function call.
-            let to_be_restored = zip(call.arguments.items, function.params.items.clone())
-                .into_iter()
-                .map(|(provided_expression, expected_arg_name)| {
-                    let evaluated = evaluate(provided_expression, vars, fns).unwrap();
-                    let name = expected_arg_name.name.id;
-
-                    (name.clone(), vars.insert(name, evaluated))
-                })
-                .collect::<Vec<_>>();
-
-            // FIXME: This will always return the last evaluated expression,
-            // fix so that it returns immediately after seeing the first return statement.
-            let evaluation_result = evaluate_many(function_body.body.body, vars, fns);
-
-            for (name, value) in to_be_restored {
-                if let Some(value) = value {
-                    vars.insert(name, value);
-                }
-            }
-
-            evaluation_result
         }
         Expression::Identifier(identifier) => {
             if let Some(var) = vars.get(&identifier.id) {
                 return Some(var.clone());
             }
 
-            if let Some(func) = fns.get(&identifier.id) {
-                return func
-                    .clone()
-                    .body
-                    .map(|inner| evaluate_many(inner.body.body, vars, fns))
-                    .flatten();
+            let call = Call {
+                callee: identifier.clone(),
+                arguments: CallArguments::default(),
+            };
+
+            if let Some(_) = fns.get(&identifier.id) {
+                return call_function(call, vars, fns, prelude);
+            }
+
+            if let Some(_) = prelude.get(&identifier.id) {
+                return call_native_function(call, vars, fns, prelude);
             }
 
             panic!("Identifier {identifier} is neither defined as a variable nor a function.")
@@ -117,15 +95,15 @@ pub fn evaluate(xp: Expression, vars: &mut Variables, fns: &mut Functions) -> Op
         },
         Expression::Return(ret) => {
             if let Some(xp) = ret.xp {
-                evaluate(*xp, vars, fns)
+                evaluate(*xp, vars, fns, prelude)
             } else {
                 None
             }
         }
         Expression::Break(_ret) => todo!(),
         Expression::Dyadic(dyadic) => {
-            let left = evaluate(*dyadic.left, vars, fns);
-            let right = evaluate(*dyadic.right, vars, fns);
+            let left = evaluate(*dyadic.left, vars, fns, prelude);
+            let right = evaluate(*dyadic.right, vars, fns, prelude);
 
             let Some(left) = left else { return None };
             let Some(right) = right else { return None };
@@ -164,16 +142,90 @@ pub fn evaluate_many(
     xps: Vec<Expression>,
     vars: &mut Variables,
     fns: &mut Functions,
+    prelude: &mut Prelude,
 ) -> Option<Value> {
     let Some((last, rest)) = xps.split_last() else {
         return None; // Empty block
     };
 
     for xp in rest {
-        evaluate(xp.clone(), vars, fns);
+        evaluate(xp.clone(), vars, fns, prelude);
     }
 
-    return evaluate(last.clone(), vars, fns);
+    return evaluate(last.clone(), vars, fns, prelude);
+}
+
+fn call_function(
+    call: Call,
+    vars: &mut Variables,
+    fns: &mut Functions,
+    prelude: &mut Prelude,
+) -> Option<Value> {
+    let function = fns.get(&call.callee.id).expect(&format!(
+        "Function with the name {} does not exist.",
+        call.callee.id
+    ));
+
+    let Some(function_body) = function.body.clone() else {
+        return None;
+    };
+
+    let expected_parameter_count = function.params.items.len();
+    let provided_parameter_count = call.arguments.items.len();
+    if expected_parameter_count != provided_parameter_count {
+        panic!(
+            "Function {} expected {} parameters, got {} instead.",
+            function.name.id, expected_parameter_count, provided_parameter_count
+        );
+    }
+
+    // Evaluate provided params and add them to the scope.
+    // Save items of the scope with the same names as the params so they can be to_be_restored
+    // after function call.
+    let to_be_restored = zip(call.arguments.items, function.params.items.clone())
+        .into_iter()
+        .map(|(provided_expression, expected_arg_name)| {
+            let evaluated = evaluate(provided_expression, vars, fns, prelude).unwrap();
+            let name = expected_arg_name.name.id;
+
+            (name.clone(), vars.insert(name, evaluated))
+        })
+        .collect::<Vec<_>>();
+
+    // FIXME: This will always return the last evaluated expression,
+    // fix so that it returns immediately after seeing the first return statement.
+    let evaluation_result = evaluate_many(function_body.body.body, vars, fns, prelude);
+
+    for (name, value) in to_be_restored {
+        if let Some(value) = value {
+            vars.insert(name, value);
+        }
+    }
+
+    evaluation_result
+}
+
+fn call_native_function(
+    call: Call,
+    vars: &mut Variables,
+    fns: &mut Functions,
+    prelude: &mut Prelude,
+) -> Option<Value> {
+    let params = call
+        .arguments
+        .items
+        .into_iter()
+        .map(|xp| {
+            evaluate(xp, vars, fns, prelude).expect("Expected argument to resolve to a value")
+        })
+        .collect::<Vec<_>>();
+
+    let function = prelude.get(&call.callee.id).expect(&format!(
+        "Native function with the name {} does not exist in the current prelude.",
+        call.callee.id
+    ));
+
+    (function)(params)
 }
 
 #[cfg(test)]
@@ -194,6 +246,7 @@ mod tests {
                 .expect("Expected at least one expression"),
             &mut Variables::default(),
             &mut Functions::default(),
+            &mut Prelude::default(),
         );
 
         assert_eq!(evaluated, Some(Value::Number(4.0)))
@@ -210,6 +263,7 @@ mod tests {
                 .expect("Expected at least one expression"),
             &mut Variables::default(),
             &mut Functions::default(),
+            &mut Prelude::default(),
         );
 
         assert_eq!(evaluated, Some(Value::Number(4.0)))
@@ -220,6 +274,7 @@ mod tests {
         let parsed = parse_program("myVar val 2");
         let mut vars = Variables::default();
         let mut fns = Functions::default();
+        let mut prelude = Prelude::default();
 
         evaluate(
             parsed
@@ -229,6 +284,7 @@ mod tests {
                 .expect("Expected at least one expression"),
             &mut vars,
             &mut fns,
+            &mut prelude,
         );
 
         assert_eq!(vars.get("myVar").cloned(), Some(Value::Number(2.0)))
@@ -245,11 +301,12 @@ mod tests {
 
         let mut vars = Variables::default();
         let mut fns = Functions::default();
+        let mut prelude = Prelude::default();
 
         let result = parsed
             .body
             .into_iter()
-            .map(|xp| evaluate(xp, &mut vars, &mut fns));
+            .map(|xp| evaluate(xp, &mut vars, &mut fns, &mut prelude));
 
         assert_eq!(
             result.into_iter().last().unwrap(),

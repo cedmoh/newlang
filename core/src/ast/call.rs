@@ -6,7 +6,7 @@ pub struct Call {
     pub arguments: CallArguments,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct CallArguments {
     pub items: Vec<Expression>,
 }

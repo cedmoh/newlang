@@ -1,3 +1,1 @@
-main fn {
-  while true do print `Looping forever!`
-}
+while true do print `Looping forever!`

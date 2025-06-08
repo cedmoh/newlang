@@ -1,5 +1,3 @@
-main fn {
-  if true {
-    print 'Executed!'
-  }
+if true {
+  print 'Executed!'
 }

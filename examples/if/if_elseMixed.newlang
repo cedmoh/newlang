@@ -1,6 +1,4 @@
-main fn {
-  if false do 'Not Executed!'
-  else {
-    print 'Executed!'
-  }
+if false do 'Not Executed!'
+else {
+  print 'Executed!'
 }

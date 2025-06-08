@@ -1,8 +1,6 @@
-main fn {
-    n var 42 
-    result var 1
-    while n > 0 {
-        result *= n
-        n -= 1
-    }
+n var 42 
+result var 1
+while n > 0 {
+    result *= n
+    n -= 1
 }

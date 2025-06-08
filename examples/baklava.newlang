@@ -1,6 +1,4 @@
-main fn {
-    for i in -10..11 
-        print '{} {}',
-            ' '.repeat i.abs,
-            '*'.repeat(21 - 2 * i.abs)
-}
+for i in -10..11 
+    print '{} {}',
+        ' '.repeat i.abs,
+        '*'.repeat(21 - 2 * i.abs)

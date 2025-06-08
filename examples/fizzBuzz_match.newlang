@@ -1,8 +1,6 @@
-main fn {
-  for num in 1..100 print match num % 3, num % 5 {
-    0, 0 do 'FizzBuzz',
-    0, _ do 'Fizz',
-    _, 0 do 'Buzz',
-    _    do num
-  }
+for num in 1..100 print match num % 3, num % 5 {
+  0, 0 do 'FizzBuzz',
+  0, _ do 'Fizz',
+  _, 0 do 'Buzz',
+  _    do num
 }

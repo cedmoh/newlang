@@ -1,5 +1,3 @@
-main fn {
-  loop {
-    print 'Looping forever!'
-  }
+loop {
+  print 'Looping forever!'
 }

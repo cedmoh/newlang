@@ -1,5 +1,3 @@
-main fn {
-  loop {
-    break
-  }
+loop {
+  break
 }

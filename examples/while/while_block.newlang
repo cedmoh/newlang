@@ -1,5 +1,3 @@
-main fn {
-  while true {
-    print 'Looping forever!'
-  }
+while true {
+  print 'Looping forever!'
 }

@@ -1,6 +1,4 @@
-main fn {
-  match true {
-    true do print 'Executed!',
-    false do print 'Not Executed :('
-  }
+match true {
+  true do print 'Executed!',
+  false do print 'Not Executed :('
 }

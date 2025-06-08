@@ -1,5 +1,3 @@
-main fn {
-  if false do print 'Not Executed :('
-  elsif false do print 'Also Not Executed :('
-  else print 'Executed!'
-}
+if false do print 'Not Executed :('
+elsif false do print 'Also Not Executed :('
+else print 'Executed!'

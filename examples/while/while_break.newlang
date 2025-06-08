@@ -1,5 +1,3 @@
-main fn {
-  while true {
-    break
-  }
+while true {
+  break
 }
