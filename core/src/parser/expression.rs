@@ -19,10 +19,21 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
             Expression::Block(Block { body })
         }
         Rule::loop_block => {
-            todo!()
+            let mut inner = pair.into_inner();
+            let block_pair = inner.next().expect("Expected a block in loop_block");
+            let body = make_block(block_pair);
+            Expression::Loop(Loop { body })
         }
         Rule::while_block => {
-            todo!()
+            let mut inner = pair.into_inner();
+            let condition_pair = inner.next().expect("Expected a condition in while_block");
+            let block_pair = inner.next().expect("Expected a block in while_block");
+            let condition = make_expression(condition_pair);
+            let body = make_block(block_pair);
+            Expression::While(While {
+                condition: Box::new(condition),
+                body,
+            })
         }
         Rule::if_condition => {
             let mut inner = pair.into_inner();
@@ -82,6 +93,9 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                 .collect(),
         }),
         Rule::match_xp => {
+            todo!()
+        }
+        Rule::assignment => {
             todo!()
         }
         Rule::member => {

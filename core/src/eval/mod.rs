@@ -43,8 +43,25 @@ pub fn evaluate(
                 None
             }
         },
-        Expression::Loop(_loop) => todo!(),
-        Expression::While(_while) => todo!(),
+        Expression::Loop(r#loop) => {
+            // TODO: implement breaking
+            loop {
+                evaluate_many(r#loop.body.body.clone(), vars, fns, prelude);
+            }
+        }
+        Expression::While(r#while) => {
+            let mut last = None;
+
+            // TODO: implement breaking
+            while let Value::Boolean(true) =
+                evaluate(*r#while.condition.clone(), vars, fns, prelude)
+                    .expect("Expected condition to eval to a value")
+            {
+                last = evaluate_many(r#while.body.body.clone(), vars, fns, prelude);
+            }
+
+            last
+        }
         Expression::IfChain(if_chain) => {
             for branch in if_chain.branches {
                 match branch {
