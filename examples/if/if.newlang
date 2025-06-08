@@ -1,1 +1,3 @@
-if true do print 'Executed!'
+if true {
+  print 'Executed!'
+}

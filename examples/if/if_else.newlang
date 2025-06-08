@@ -1,2 +1,2 @@
-if false do print 'Not Executed :('
-else print 'Executed!'
+if false { print 'Not Executed :(' }
+else { print 'Executed!' }
