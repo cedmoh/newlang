@@ -14,8 +14,8 @@ impl Display for Value {
         match self {
             Value::Number(e) => write!(f, "{}", e),
             Value::Boolean(e) => write!(f, "{}", e),
-            Value::Character(e) => write!(f, "c'{}'", e),
-            Value::String(e) => write!(f, "'{}'", e),
+            Value::Character(e) => write!(f, "{}", e),
+            Value::String(e) => write!(f, "{}", e),
             Value::Nil => write!(f, "nil"),
         }
     }
