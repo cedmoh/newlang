@@ -268,13 +268,13 @@ pub fn evaluate(
             let name = assignment.identifier.id.clone();
             let value = evaluate(*assignment.value, vars, fns, prelude);
 
-            if let Some(value) = value {
+            if let Some(value) = value.clone() {
                 vars.insert(name, value);
             } else {
                 vars.remove(&name);
             }
 
-            None
+            value
         }
     }
 }
@@ -290,7 +290,25 @@ pub fn evaluate_many(
     };
 
     for xp in rest {
-        evaluate(xp.clone(), vars, fns, prelude);
+        match xp {
+            Expression::Return(ret_xp) => {
+                if let Some(xp) = &ret_xp.xp {
+                    evaluate(*xp.clone(), vars, fns, prelude);
+                } else {
+                    continue;
+                }
+            }
+            Expression::Break(br_xp) => {
+                if let Some(xp) = &br_xp.xp {
+                    evaluate(*xp.clone(), vars, fns, prelude);
+                } else {
+                    continue;
+                }
+            }
+            _ => {
+                evaluate(xp.clone(), vars, fns, prelude);
+            }
+        }
     }
 
     return evaluate(last.clone(), vars, fns, prelude);

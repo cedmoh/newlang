@@ -7,7 +7,7 @@
   "useGitignore": true,
   // words - list of words to be always considered correct
   "words": [
-    "newlang"
+    "newlang",
   ],
   "dictionaries": [
     "rust",

@@ -1,5 +1,5 @@
 use clap::{Arg, Command, command};
-use core::{eval::Value, runner::run};
+use core::{eval::Value, runtime::Runtime};
 use std::path::PathBuf;
 
 mod styles;
@@ -11,7 +11,7 @@ fn main() {
         .styles(CARGO_STYLING)
         .about("A CLI tool for working with projects written in newlang")
         .subcommand_required(false)
-        .arg_required_else_help(true)
+        .arg_required_else_help(false)
         .arg(
             Arg::new("file")
                 .value_name("FILE")
@@ -41,6 +41,8 @@ fn main() {
                     Some(val) => println!("{}", val),
                     None => println!(""),
                 }
+            } else {
+                repl();
             }
         }
         // Provided Subcommand is `fmt`
@@ -59,10 +61,43 @@ fn execute_file(path: &PathBuf) -> Option<Value> {
     let content = std::fs::read_to_string(path).expect("Failed to read file");
 
     // Execute contents.
-    run(content.as_str()).expect("Failed to execute file.")
+    Runtime::new().run(content.as_str())
 }
 
 fn format_path(path: &PathBuf) {
     println!("Formatting files at path: {:?}", path);
     todo!()
+}
+
+fn repl() {
+    use std::io::{self, Write};
+
+    let mut runtime = Runtime::new();
+
+    println!("Welcome to the newlang REPL. Type 'exit' or 'quit' to leave.");
+
+    loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+        if io::stdin().read_line(&mut input).is_err() {
+            println!("Error reading input.");
+            continue;
+        }
+
+        let trimmed = input.trim();
+        if trimmed == "exit" || trimmed == "quit" {
+            break;
+        }
+
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        match runtime.run(trimmed) {
+            Some(out) => println!("< {}", out),
+            None => println!(),
+        }
+    }
 }
