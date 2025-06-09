@@ -1,5 +1,5 @@
 mod env;
-mod print;
+mod std;
 
 pub use env::Runtime;
-pub use print::my_print;
+pub use std::*;

@@ -1,8 +1,6 @@
-use super::my_print;
 use crate::{
     eval::{Functions, InternalFunction, Prelude, Value, Variables, evaluate_many},
     parser::parse_program,
-    runtime::print::my_println,
 };
 
 #[derive(Default)]
@@ -18,25 +16,31 @@ impl Runtime {
         let functions = Functions::default();
         let mut prelude = Prelude::default();
 
-        prelude.insert(
-            "print".to_string(),
-            InternalFunction {
-                body: Box::new(my_print),
-            },
-        );
-
-        prelude.insert(
-            "println".to_string(),
-            InternalFunction {
-                body: Box::new(my_println),
-            },
-        );
+        Runtime::register_std_functions(&mut prelude);
 
         Runtime {
             variables,
             functions,
             prelude,
         }
+    }
+
+    fn register_std_functions(prelude: &mut Prelude) {
+        use crate::runtime::std::{print, write};
+
+        prelude.insert(
+            "write".to_string(),
+            InternalFunction {
+                body: Box::new(write),
+            },
+        );
+
+        prelude.insert(
+            "print".to_string(),
+            InternalFunction {
+                body: Box::new(print),
+            },
+        );
     }
 
     pub fn add_variable(&mut self, name: String, value: Value) {

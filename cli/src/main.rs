@@ -2,9 +2,12 @@ use clap::{Arg, Command, command};
 use core::{eval::Value, runtime::Runtime};
 use std::path::PathBuf;
 
+mod repl;
 mod styles;
 
 use styles::CARGO_STYLING;
+
+use crate::repl::Repl;
 
 fn main() {
     let command = command!()
@@ -67,31 +70,5 @@ fn format_path(path: &PathBuf) {
 }
 
 fn repl() {
-    use std::io::{self, Write};
-
-    let mut runtime = Runtime::new();
-
-    println!("Welcome to the newlang REPL. Type 'exit' or 'quit' to leave.");
-
-    loop {
-        print!("> ");
-        io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        if io::stdin().read_line(&mut input).is_err() {
-            println!("Error reading input.");
-            continue;
-        }
-
-        let trimmed = input.trim();
-        if trimmed == "exit" || trimmed == "quit" {
-            break;
-        }
-
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        println!("< {}", runtime.run(trimmed));
-    }
+    Repl::new().start();
 }

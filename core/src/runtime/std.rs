@@ -1,6 +1,6 @@
 use crate::eval::Value;
 
-pub fn my_print(params: Vec<Value>) -> Value {
+pub fn write(params: Vec<Value>) -> Value {
     for param in params {
         print!("{}", param)
     }
@@ -8,7 +8,7 @@ pub fn my_print(params: Vec<Value>) -> Value {
     Value::Nil
 }
 
-pub fn my_println(params: Vec<Value>) -> Value {
+pub fn print(params: Vec<Value>) -> Value {
     for param in params {
         println!("{}", param)
     }
