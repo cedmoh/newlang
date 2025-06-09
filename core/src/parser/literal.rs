@@ -4,6 +4,7 @@ use pest::iterators::Pair;
 
 pub fn make_literal(pair: Pair<Rule>) -> Literal {
     match pair.as_rule() {
+        Rule::nil_lit => Literal::Nil,
         Rule::array_lit => todo!(),
         Rule::tuple_lit => todo!(),
         Rule::boolean_lit => {

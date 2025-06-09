@@ -10,7 +10,7 @@ use crate::ast::*;
 
 pub fn parse_program(input: &str) -> Ast {
     let mut pairs = rules::parse_rules(input)
-        .map_err(|_| ())
+        .map_err(|e| eprintln!("{}", e))
         .expect("Could not parse rules.");
 
     let pair = pairs.next().expect("Expected a program");

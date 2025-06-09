@@ -2,6 +2,7 @@ use crate::{ast::Literal, eval::Value};
 
 pub fn eval_literal(literal: Literal) -> Value {
     match literal {
+        Literal::Nil => Value::Nil,
         Literal::Array => todo!(),
         Literal::Tuple => todo!(),
         Literal::Boolean(boolean_literal) => Value::Boolean(boolean_literal.value),

@@ -40,7 +40,7 @@ fn main() {
         // No subcommand provided.
         None => {
             if let Some(file) = matches.get_one::<PathBuf>("file") {
-                println!("{}", execute_file(file));
+                execute_file(file);
             } else {
                 repl();
             }

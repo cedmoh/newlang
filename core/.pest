@@ -8,7 +8,7 @@ true    = @{ "true" }
 false   = @{ "false" }
 fn      = _{ "fn" }
 ret     = @{ "ret" }
-do      = @{ "do" }
+do      = _{ "do" }
 not     = @{ "not" }
 for     = @{ "for" }
 while   = _{ "while" }
@@ -19,6 +19,7 @@ if      = _{ "if" }
 elsif   = _{ "elsif" }
 else    = _{ "else" }
 match   = @{ "match" }
+nil     = @{ "nil" }
 keyword =  {
   
   | var
@@ -38,6 +39,7 @@ keyword =  {
   | elsif
   | else
   | match
+  | nil
 }
 
 // Operators
@@ -179,7 +181,9 @@ var_nomination = _{ var_name ~ var_type? ~ val_or_var }
 
 // Literals
 lit         = {
-    array_lit
+  
+  | nil_lit
+  | array_lit
   | tuple_lit
   | boolean_lit
   | character_lit
@@ -187,6 +191,7 @@ lit         = {
   | number_lit
   | hexadecimal_lit
 }
+nil_lit     = { nil }
 string_lit  = { "'" ~ string_text ~ "'" }
 string_text = { (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
@@ -238,7 +243,7 @@ match_arm   = { pattern ~ do ~ xp }
 loop_block = { loop ~ nls ~ block }
 
 // While
-while_block = { while ~ xp ~ nls ~ block }
+while_block = { while ~ xp ~ do? ~ nls ~ block }
 
 // Comments
 COMMENT             = _{ !hexadecimal_lit ~ (multi_comment | inline_comment | single_comment) ~ nls }

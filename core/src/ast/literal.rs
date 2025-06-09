@@ -1,5 +1,6 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
+    Nil,
     Array,
     Tuple,
     Boolean(BooleanLiteral),
