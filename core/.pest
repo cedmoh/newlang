@@ -2,34 +2,50 @@ program =  { SOI ~ body ~ EOI }
 body    = _{ xps? }
 
 // Keywords
-var     = @{ "var" }
-val     = @{ "val" }
-true    = @{ "true" }
-false   = @{ "false" }
-fn      = _{ "fn" }
-ret     = @{ "ret" }
-do      = _{ "do" }
-not     = @{ "not" }
-for     = @{ "for" }
-while   = _{ "while" }
-loop    = _{ "loop" }
-br      = @{ "br" }
-cont    = @{ "cont" }
-if      = _{ "if" }
-elsif   = _{ "elsif" }
-else    = _{ "else" }
-match   = @{ "match" }
-nil     = @{ "nil" }
-keyword =  {
+// declarations
+var = @{ "var" }
+val = @{ "val" }
+fn  = _{ "fn" }
+// control flow
+do    = _{ "do" }
+ret   = @{ "ret" }
+for   = @{ "for" }
+while = _{ "while" }
+loop  = _{ "loop" }
+br    = @{ "br" }
+cont  = @{ "cont" }
+if    = _{ "if" }
+elsif = _{ "elsif" }
+else  = _{ "else" }
+match = @{ "match" }
+// literals
+true  = @{ "true" }
+false = @{ "false" }
+not   = @{ "not" }
+nil   = @{ "nil" }
+// ops
+set     = { "set" }
+add     = { "add" }
+sub     = { "sub" }
+mul     = { "mul" }
+div     = { "div" }
+exp     = { "exp" }
+rem     = { "rem" }
+gt      = { "gt" }
+gte     = { "gte" }
+lt      = { "lt" }
+lte     = { "lte" }
+eq      = { "eq" }
+neq     = { "neq" }
+and     = { "and" }
+or      = { "or" }
+keyword = {
   
   | var
   | val
-  | true
-  | false
   | fn
-  | ret
   | do
-  | not
+  | ret
   | for
   | while
   | loop
@@ -39,25 +55,43 @@ keyword =  {
   | elsif
   | else
   | match
+  | true
+  | false
+  | not
   | nil
+  | set
+  | add
+  | sub
+  | mul
+  | div
+  | exp
+  | rem
+  | gt
+  | gte
+  | lt
+  | lte
+  | eq
+  | neq
+  | and
+  | or
 }
 
 // Operators
-assignment             = @{ "=" }
-addition               = @{ "+" }
-subtraction            = @{ "-" }
-multiplication         = @{ "*" }
-division               = @{ "/" }
-exponent               = @{ "^" }
-modulo                 = @{ "%" }
-greater_than           = @{ ">" }
-greater_than_or_equals = @{ ">=" }
-less_than              = @{ "<" }
-less_than_or_equals    = @{ "<=" }
-equals                 = @{ "==" }
-not_equals             = @{ "!=" }
-and                    = @{ "&&" }
-or                     = @{ "||" }
+assignment             = @{ "=" | set }
+addition               = @{ "+" | add }
+subtraction            = @{ "-" | sub }
+multiplication         = @{ "*" | mul }
+division               = @{ "/" | div }
+exponent               = @{ "^" | exp }
+modulo                 = @{ "%" | rem }
+greater_than           = @{ ">" | gt }
+greater_than_or_equals = @{ ">=" | gte }
+less_than              = @{ "<" | lt }
+less_than_or_equals    = @{ "<=" | lte }
+equals                 = @{ "==" | eq }
+not_equals             = @{ "!=" | neq }
+logic_and              = @{ "&&" | and }
+logic_or               = @{ "||" | or }
 op                     = _{
   
   | addition
@@ -72,8 +106,8 @@ op                     = _{
   | less_than_or_equals
   | equals
   | not_equals
-  | and
-  | or
+  | logic_and
+  | logic_or
 }
 
 // Operation
@@ -137,15 +171,13 @@ call           =  { callee ~ call_generics? ~ ("()" | "("? ~ call_arguments ~ ")
 call_generics  =  { "<" ~ generic_param+ ~ ">" }
 generic_param  = @{ identifier }
 callee         = @{ identifier }
-call_arguments =  { xp ~ ("," ~ xp)? }
+call_arguments =  { xp ~ ("," ~ xp)* }
 
 // Declaration
 dl = { var_dl | fn_dl }
 
 // Identifiers
-// TODO: can we allow identifiers to start with numbers if we exclude all number lits?
-// identifier = @{ !number_lit ~ ASCII_ALPHANUMERIC+ }
-identifier = @{ !(number_lit | keyword) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 
 // Blocks
 block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }

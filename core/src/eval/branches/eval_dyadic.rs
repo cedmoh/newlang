@@ -14,15 +14,15 @@ pub fn eval_dyadic(
     match dyadic.operator {
         DyadicOperator::Add => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left + right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for add: {:?} and {:?}", x, y),
         },
         DyadicOperator::Subtract => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left - right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for subtract: {:?} and {:?}", x, y),
         },
         DyadicOperator::Multiply => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left * right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for multiply: {:?} and {:?}", x, y),
         },
         DyadicOperator::Divide => match (left, right) {
             (Value::Number(left), Value::Number(right)) => {
@@ -32,7 +32,7 @@ pub fn eval_dyadic(
                     Value::Number(left / right)
                 }
             }
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for divide: {:?} and {:?}", x, y),
         },
         DyadicOperator::Modulo => match (left, right) {
             (Value::Number(left), Value::Number(right)) => {
@@ -42,11 +42,11 @@ pub fn eval_dyadic(
                     Value::Number(left % right)
                 }
             }
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for modulo: {:?} and {:?}", x, y),
         },
         DyadicOperator::Power => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left.powf(right)),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for power: {:?} and {:?}", x, y),
         },
         DyadicOperator::Equal => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left == right),
@@ -54,41 +54,47 @@ pub fn eval_dyadic(
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left == right),
             (Value::Character(left), Value::Character(right)) => Value::Boolean(left == right),
             (Value::Nil, Value::Nil) => Value::Boolean(true),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for equal: {:?} and {:?}", x, y),
         },
         DyadicOperator::NotEqual => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left != right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left != right),
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left != right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for not equals: {:?} and {:?}", x, y),
         },
         DyadicOperator::LessThan => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left < right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left < right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for less than: {:?} and {:?}", x, y),
         },
         DyadicOperator::GreaterThan => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left > right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left > right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for greater than: {:?} and {:?}", x, y),
         },
         DyadicOperator::LessThanOrEqual => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left <= right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left <= right),
-            _ => Value::Nil,
+            (x, y) => panic!(
+                "Invalid operands for less than or equals: {:?} and {:?}",
+                x, y
+            ),
         },
         DyadicOperator::GreaterThanOrEqual => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left >= right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left >= right),
-            _ => Value::Nil,
+            (x, y) => panic!(
+                "Invalid operands for greater than or equals: {:?} and {:?}",
+                x, y
+            ),
         },
         DyadicOperator::And => match (left, right) {
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left && right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for and: {:?} and {:?}", x, y),
         },
         DyadicOperator::Or => match (left, right) {
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left || right),
-            _ => Value::Nil,
+            (x, y) => panic!("Invalid operands for or: {:?} and {:?}", x, y),
         },
     }
 }

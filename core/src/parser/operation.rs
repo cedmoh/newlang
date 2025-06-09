@@ -16,8 +16,8 @@ pub fn make_dyadic_operator(pair: Pair<Rule>) -> DyadicOperator {
         Rule::greater_than => DyadicOperator::GreaterThan,
         Rule::less_than_or_equals => DyadicOperator::LessThanOrEqual,
         Rule::greater_than_or_equals => DyadicOperator::GreaterThanOrEqual,
-        Rule::and => DyadicOperator::And,
-        Rule::or => DyadicOperator::Or,
+        Rule::logic_and => DyadicOperator::And,
+        Rule::logic_or => DyadicOperator::Or,
         _ => {
             panic!("Unexpected rule for dyadic operator: {:?}", pair.as_rule());
         }

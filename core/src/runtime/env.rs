@@ -26,7 +26,7 @@ impl Runtime {
     }
 
     fn register_std_functions(prelude: &mut Prelude) {
-        use crate::runtime::std::{print, write};
+        use crate::runtime::std::*;
 
         prelude.insert(
             "write".to_string(),
@@ -39,6 +39,13 @@ impl Runtime {
             "print".to_string(),
             InternalFunction {
                 body: Box::new(print),
+            },
+        );
+
+        prelude.insert(
+            "eqs".to_string(),
+            InternalFunction {
+                body: Box::new(eqs),
             },
         );
     }
