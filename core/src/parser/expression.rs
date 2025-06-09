@@ -95,8 +95,20 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         Rule::match_xp => {
             todo!()
         }
-        Rule::assignment => {
-            todo!()
+        Rule::assign => {
+            let mut inner = pair.into_inner();
+            let identifier_pair = inner.next().expect("Expected an identifier in assign");
+            let expression_pair = inner.next().expect("Expected an expression in assign");
+
+            let identifier = Identifier {
+                id: identifier_pair.as_str().to_string(),
+            };
+            let expression = make_expression(expression_pair);
+
+            Expression::Assignment(Assignment {
+                identifier,
+                value: Box::new(expression),
+            })
         }
         Rule::member => {
             todo!()
@@ -138,33 +150,12 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                     primary.as_rule()
                 ),
             })
-            .map_infix(|lhs, op, rhs| match op.as_rule() {
-                Rule::addition => Expression::Dyadic(Dyadic {
+            .map_infix(|lhs, op, rhs| {
+                Expression::Dyadic(Dyadic {
                     operator: make_dyadic_operator(op),
                     left: Box::new(lhs),
                     right: Box::new(rhs),
-                }),
-                Rule::subtraction => Expression::Dyadic(Dyadic {
-                    operator: make_dyadic_operator(op),
-                    left: Box::new(lhs),
-                    right: Box::new(rhs),
-                }),
-                Rule::multiplication => Expression::Dyadic(Dyadic {
-                    operator: make_dyadic_operator(op),
-                    left: Box::new(lhs),
-                    right: Box::new(rhs),
-                }),
-                Rule::division => Expression::Dyadic(Dyadic {
-                    operator: make_dyadic_operator(op),
-                    left: Box::new(lhs),
-                    right: Box::new(rhs),
-                }),
-                Rule::exponent => Expression::Dyadic(Dyadic {
-                    operator: make_dyadic_operator(op),
-                    left: Box::new(lhs),
-                    right: Box::new(rhs),
-                }),
-                _ => unreachable!(),
+                })
             })
             .parse(pair.into_inner()),
         Rule::identifier => {

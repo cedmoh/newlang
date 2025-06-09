@@ -20,7 +20,8 @@ elsif   = _{ "elsif" }
 else    = _{ "else" }
 match   = @{ "match" }
 keyword =  {
-    var
+  
+  | var
   | val
   | true
   | false
@@ -40,25 +41,37 @@ keyword =  {
 }
 
 // Operators
-assignment     = @{ "=" }
-addition       = @{ "+" }
-subtraction    = @{ "-" }
-multiplication = @{ "*" }
-division       = @{ "/" }
-exponent       = @{ "^" }
-greater_than   = @{ ">" }
-less_than      = @{ "<" }
-equals         = @{ "==" }
-op             = _{
+assignment             = @{ "=" }
+addition               = @{ "+" }
+subtraction            = @{ "-" }
+multiplication         = @{ "*" }
+division               = @{ "/" }
+exponent               = @{ "^" }
+modulo                 = @{ "%" }
+greater_than           = @{ ">" }
+greater_than_or_equals = @{ ">=" }
+less_than              = @{ "<" }
+less_than_or_equals    = @{ "<=" }
+equals                 = @{ "==" }
+not_equals             = @{ "!=" }
+and                    = @{ "&&" }
+or                     = @{ "||" }
+op                     = _{
   
   | addition
   | subtraction
   | multiplication
   | division
   | exponent
+  | modulo
   | greater_than
+  | greater_than_or_equals
   | less_than
+  | less_than_or_equals
   | equals
+  | not_equals
+  | and
+  | or
 }
 
 // Operation
@@ -70,7 +83,7 @@ xps         = _{ (nls ~ xp ~ nls)+ }
 xp          =  { operation | evaluation }
 evaluation  = _{
   
-  | assignment_xp
+  | assign
   | block
   | dl
   | loop_block
@@ -107,7 +120,7 @@ lv1_ops = _{ multiplication | division }
 lv2_ops = _{ exponent }
 
 // Assignment
-assignment_xp = { identifier ~ "=" ~ xp }
+assign = { identifier ~ "=" ~ xp }
 
 // Paths
 member         = { member_subject ~ member_object }

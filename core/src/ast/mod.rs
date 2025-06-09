@@ -1,3 +1,4 @@
+mod assignment;
 mod block;
 mod call;
 mod declaration;
@@ -13,6 +14,7 @@ mod pattern;
 mod r#type;
 mod r#while;
 
+pub use assignment::*;
 pub use block::*;
 pub use call::*;
 pub use declaration::*;

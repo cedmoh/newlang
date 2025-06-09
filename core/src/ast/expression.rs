@@ -15,6 +15,7 @@ pub enum Expression {
     Dyadic(Dyadic),
     Return(Return),
     Break(Break),
+    Assignment(Assignment),
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -158,19 +158,123 @@ pub fn evaluate(
                     }
                     _ => None,
                 },
-                DyadicOperator::Multiply => todo!(),
-                DyadicOperator::Divide => todo!(),
-                DyadicOperator::Modulo => todo!(),
-                DyadicOperator::Power => todo!(),
-                DyadicOperator::Equal => todo!(),
-                DyadicOperator::NotEqual => todo!(),
-                DyadicOperator::LessThan => todo!(),
-                DyadicOperator::GreaterThan => todo!(),
-                DyadicOperator::LessThanOrEqual => todo!(),
-                DyadicOperator::GreaterThanOrEqual => todo!(),
-                DyadicOperator::And => todo!(),
-                DyadicOperator::Or => todo!(),
+                DyadicOperator::Multiply => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Number(left * right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::Divide => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        if right == 0.0 {
+                            None // Division by zero
+                        } else {
+                            Some(Value::Number(left / right))
+                        }
+                    }
+                    _ => None,
+                },
+                DyadicOperator::Modulo => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        if right == 0.0 {
+                            None // Modulo by zero
+                        } else {
+                            Some(Value::Number(left % right))
+                        }
+                    }
+                    _ => None,
+                },
+                DyadicOperator::Power => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Number(left.powf(right)))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::Equal => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left == right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left == right))
+                    }
+                    (Value::Boolean(left), Value::Boolean(right)) => {
+                        Some(Value::Boolean(left == right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::NotEqual => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left != right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left != right))
+                    }
+                    (Value::Boolean(left), Value::Boolean(right)) => {
+                        Some(Value::Boolean(left != right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::LessThan => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left < right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left < right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::GreaterThan => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left > right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left > right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::LessThanOrEqual => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left <= right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left <= right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::GreaterThanOrEqual => match (left, right) {
+                    (Value::Number(left), Value::Number(right)) => {
+                        Some(Value::Boolean(left >= right))
+                    }
+                    (Value::String(left), Value::String(right)) => {
+                        Some(Value::Boolean(left >= right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::And => match (left, right) {
+                    (Value::Boolean(left), Value::Boolean(right)) => {
+                        Some(Value::Boolean(left && right))
+                    }
+                    _ => None,
+                },
+                DyadicOperator::Or => match (left, right) {
+                    (Value::Boolean(left), Value::Boolean(right)) => {
+                        Some(Value::Boolean(left || right))
+                    }
+                    _ => None,
+                },
             }
+        }
+        Expression::Assignment(assignment) => {
+            let name = assignment.identifier.id.clone();
+            let value = evaluate(*assignment.value, vars, fns, prelude);
+
+            if let Some(value) = value {
+                vars.insert(name, value);
+            } else {
+                vars.remove(&name);
+            }
+
+            None
         }
     }
 }
