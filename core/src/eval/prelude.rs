@@ -5,7 +5,7 @@ use std::{
 
 use crate::eval::Value;
 
-type NativeFunctionSignature = Box<dyn Fn(Vec<Value>) -> Option<Value>>;
+type NativeFunctionSignature = Box<dyn Fn(Vec<Value>) -> Value>;
 
 pub struct InternalFunction {
     pub body: NativeFunctionSignature,

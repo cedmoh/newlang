@@ -37,10 +37,7 @@ fn main() {
         // No subcommand provided.
         None => {
             if let Some(file) = matches.get_one::<PathBuf>("file") {
-                match execute_file(file) {
-                    Some(val) => println!("{}", val),
-                    None => println!(""),
-                }
+                println!("{}", execute_file(file));
             } else {
                 repl();
             }
@@ -56,7 +53,7 @@ fn main() {
     }
 }
 
-fn execute_file(path: &PathBuf) -> Option<Value> {
+fn execute_file(path: &PathBuf) -> Value {
     // Read file.
     let content = std::fs::read_to_string(path).expect("Failed to read file");
 
@@ -95,9 +92,6 @@ fn repl() {
             continue;
         }
 
-        match runtime.run(trimmed) {
-            Some(out) => println!("< {}", out),
-            None => println!(),
-        }
+        println!("< {}", runtime.run(trimmed));
     }
 }

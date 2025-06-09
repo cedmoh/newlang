@@ -17,7 +17,7 @@ pub fn evaluate(
     vars: &mut Variables,
     fns: &mut Functions,
     prelude: &mut Prelude,
-) -> Option<Value> {
+) -> Value {
     match xp {
         Expression::Block(block) => return evaluate_many(block.body, vars, fns, prelude),
         Expression::Declaration(declaration) => match declaration {
@@ -26,36 +26,30 @@ pub fn evaluate(
 
                 let value = var_decl
                     .initial_value
-                    .map(|expr| evaluate(*expr, vars, fns, prelude))
-                    .flatten();
+                    .map(|expr| evaluate(*expr, vars, fns, prelude));
 
-                // TODO: Restore old value when scope is left
-                vars.insert(name, value.clone().unwrap_or(Value::Nil));
+                let value = value.unwrap_or(Value::Nil);
+
+                vars.insert(name, value.clone());
 
                 value
             }
             Declaration::FunctionDeclaration(fn_decl) => {
                 let name = fn_decl.name.id.clone();
 
-                // TODO: Handle function parameters and body
                 fns.insert(name, fn_decl);
 
-                None
+                Value::Nil
             }
         },
-        Expression::Loop(r#loop) => {
-            // TODO: implement breaking
-            loop {
-                evaluate_many(r#loop.body.body.clone(), vars, fns, prelude);
-            }
-        }
+        Expression::Loop(r#loop) => loop {
+            evaluate_many(r#loop.body.body.clone(), vars, fns, prelude);
+        },
         Expression::While(r#while) => {
-            let mut last = None;
+            let mut last = Value::Nil;
 
-            // TODO: implement breaking
             while let Value::Boolean(true) =
                 evaluate(*r#while.condition.clone(), vars, fns, prelude)
-                    .expect("Expected condition to eval to a value")
             {
                 last = evaluate_many(r#while.body.body.clone(), vars, fns, prelude);
             }
@@ -66,22 +60,17 @@ pub fn evaluate(
             for branch in if_chain.branches {
                 match branch {
                     IfBranch::ElseIf { condition, body } | IfBranch::If { condition, body } => {
-                        let evaluated_condition = evaluate(*condition, vars, fns, prelude)
-                            .expect("Expected condition to evaluate to a value");
+                        let evaluated_condition = evaluate(*condition, vars, fns, prelude);
 
-                        let Value::Boolean(should_run) = evaluated_condition else {
-                            panic!("Expected condition to evaluate to boolean");
-                        };
-
-                        if should_run {
+                        let Value::Boolean(true) = evaluated_condition else {
                             return evaluate_many(body.body, vars, fns, prelude);
-                        }
+                        };
                     }
                     IfBranch::Else { body } => return evaluate_many(body.body, vars, fns, prelude),
                 }
             }
 
-            None
+            Value::Nil
         }
         Expression::Match(_match) => todo!(),
         Expression::Member(_member) => todo!(),
@@ -97,7 +86,7 @@ pub fn evaluate(
         }
         Expression::Identifier(identifier) => {
             if let Some(var) = vars.get(&identifier.id) {
-                return Some(var.clone());
+                return var.clone();
             }
 
             let call = Call {
@@ -118,149 +107,107 @@ pub fn evaluate(
         Expression::Literal(literal) => match literal {
             Literal::Array => todo!(),
             Literal::Tuple => todo!(),
-            Literal::Boolean(boolean_literal) => Some(Value::Boolean(boolean_literal.value)),
-            Literal::Character(character_literal) => {
-                Some(Value::Character(character_literal.value))
-            }
-            Literal::String(string_literal) => Some(Value::String(string_literal.value)),
-            Literal::Decimal(decimal_literal) => Some(Value::Number(decimal_literal.value)),
+            Literal::Boolean(boolean_literal) => Value::Boolean(boolean_literal.value),
+            Literal::Character(character_literal) => Value::Character(character_literal.value),
+            Literal::String(string_literal) => Value::String(string_literal.value),
+            Literal::Decimal(decimal_literal) => Value::Number(decimal_literal.value),
             Literal::Hexadecimal(hexadecimal_literal) => {
-                Some(Value::Number(hexadecimal_literal.value as f64))
+                Value::Number(hexadecimal_literal.value as f64)
             }
-            Literal::Binary(binary_literal) => Some(Value::Number(binary_literal.value as f64)),
-            Literal::Octal(octal_literal) => Some(Value::Number(octal_literal.value as f64)),
+
+            Literal::Binary(binary_literal) => Value::Number(binary_literal.value as f64),
+            Literal::Octal(octal_literal) => Value::Number(octal_literal.value as f64),
         },
-        Expression::Return(ret) => {
-            if let Some(xp) = ret.xp {
-                evaluate(*xp, vars, fns, prelude)
-            } else {
-                None
-            }
-        }
+        Expression::Return(ret) => ret
+            .xp
+            .as_ref()
+            .map(|xp| evaluate(*xp.clone(), vars, fns, prelude))
+            .unwrap_or(Value::Nil),
         Expression::Break(_ret) => todo!(),
         Expression::Dyadic(dyadic) => {
             let left = evaluate(*dyadic.left, vars, fns, prelude);
             let right = evaluate(*dyadic.right, vars, fns, prelude);
 
-            let Some(left) = left else { return None };
-            let Some(right) = right else { return None };
-
             match dyadic.operator {
                 DyadicOperator::Add => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Number(left + right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Number(left + right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Subtract => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Number(left - right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Number(left - right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Multiply => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Number(left * right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Number(left * right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Divide => match (left, right) {
                     (Value::Number(left), Value::Number(right)) => {
                         if right == 0.0 {
-                            None // Division by zero
+                            panic!("Attempted to divide by zero.") // Division by zero
                         } else {
-                            Some(Value::Number(left / right))
+                            Value::Number(left / right)
                         }
                     }
-                    _ => None,
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Modulo => match (left, right) {
                     (Value::Number(left), Value::Number(right)) => {
                         if right == 0.0 {
-                            None // Modulo by zero
+                            panic!("Attempted to modulo by zero.") // Modulo by zero
                         } else {
-                            Some(Value::Number(left % right))
+                            Value::Number(left % right)
                         }
                     }
-                    _ => None,
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Power => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Number(left.powf(right)))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Number(left.powf(right)),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Equal => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left == right))
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left == right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left == right),
+                    (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left == right),
+                    (Value::Character(left), Value::Character(right)) => {
+                        Value::Boolean(left == right)
                     }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left == right))
-                    }
-                    (Value::Boolean(left), Value::Boolean(right)) => {
-                        Some(Value::Boolean(left == right))
-                    }
-                    _ => None,
+                    (Value::Nil, Value::Nil) => Value::Boolean(true),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::NotEqual => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left != right))
-                    }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left != right))
-                    }
-                    (Value::Boolean(left), Value::Boolean(right)) => {
-                        Some(Value::Boolean(left != right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left != right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left != right),
+                    (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left != right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::LessThan => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left < right))
-                    }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left < right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left < right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left < right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::GreaterThan => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left > right))
-                    }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left > right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left > right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left > right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::LessThanOrEqual => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left <= right))
-                    }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left <= right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left <= right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left <= right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::GreaterThanOrEqual => match (left, right) {
-                    (Value::Number(left), Value::Number(right)) => {
-                        Some(Value::Boolean(left >= right))
-                    }
-                    (Value::String(left), Value::String(right)) => {
-                        Some(Value::Boolean(left >= right))
-                    }
-                    _ => None,
+                    (Value::Number(left), Value::Number(right)) => Value::Boolean(left >= right),
+                    (Value::String(left), Value::String(right)) => Value::Boolean(left >= right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::And => match (left, right) {
-                    (Value::Boolean(left), Value::Boolean(right)) => {
-                        Some(Value::Boolean(left && right))
-                    }
-                    _ => None,
+                    (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left && right),
+                    _ => Value::Nil,
                 },
                 DyadicOperator::Or => match (left, right) {
-                    (Value::Boolean(left), Value::Boolean(right)) => {
-                        Some(Value::Boolean(left || right))
-                    }
-                    _ => None,
+                    (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left || right),
+                    _ => Value::Nil,
                 },
             }
         }
@@ -268,11 +215,7 @@ pub fn evaluate(
             let name = assignment.identifier.id.clone();
             let value = evaluate(*assignment.value, vars, fns, prelude);
 
-            if let Some(value) = value.clone() {
-                vars.insert(name, value);
-            } else {
-                vars.remove(&name);
-            }
+            vars.insert(name, value.clone());
 
             value
         }
@@ -284,9 +227,9 @@ pub fn evaluate_many(
     vars: &mut Variables,
     fns: &mut Functions,
     prelude: &mut Prelude,
-) -> Option<Value> {
+) -> Value {
     let Some((last, rest)) = xps.split_last() else {
-        return None; // Empty block
+        return Value::Nil; // Empty block
     };
 
     for xp in rest {
@@ -319,14 +262,14 @@ fn call_function(
     vars: &mut Variables,
     fns: &mut Functions,
     prelude: &mut Prelude,
-) -> Option<Value> {
+) -> Value {
     let function = fns.get(&call.callee.id).expect(&format!(
         "Function with the name {} does not exist.",
         call.callee.id
     ));
 
     let Some(function_body) = function.body.clone() else {
-        return None;
+        return Value::Nil; // Function without body, nothing to evaluate.
     };
 
     let expected_parameter_count = function.params.items.len();
@@ -344,7 +287,7 @@ fn call_function(
     let to_be_restored = zip(call.arguments.items, function.params.items.clone())
         .into_iter()
         .map(|(provided_expression, expected_arg_name)| {
-            let evaluated = evaluate(provided_expression, vars, fns, prelude).unwrap();
+            let evaluated = evaluate(provided_expression, vars, fns, prelude);
             let name = expected_arg_name.name.id;
 
             (name.clone(), vars.insert(name, evaluated))
@@ -369,14 +312,12 @@ fn call_native_function(
     vars: &mut Variables,
     fns: &mut Functions,
     prelude: &mut Prelude,
-) -> Option<Value> {
+) -> Value {
     let params = call
         .arguments
         .items
         .into_iter()
-        .map(|xp| {
-            evaluate(xp, vars, fns, prelude).expect("Expected argument to resolve to a value")
-        })
+        .map(|xp| evaluate(xp, vars, fns, prelude))
         .collect::<Vec<_>>();
 
     let function = prelude.get(&call.callee.id).expect(&format!(
@@ -408,7 +349,7 @@ mod tests {
             &mut Prelude::default(),
         );
 
-        assert_eq!(evaluated, Some(Value::Number(4.0)))
+        assert_eq!(evaluated, Value::Number(4.0))
     }
 
     #[test]
@@ -425,7 +366,7 @@ mod tests {
             &mut Prelude::default(),
         );
 
-        assert_eq!(evaluated, Some(Value::Number(4.0)))
+        assert_eq!(evaluated, Value::Number(4.0))
     }
 
     #[test]
@@ -467,9 +408,6 @@ mod tests {
             .into_iter()
             .map(|xp| evaluate(xp, &mut vars, &mut fns, &mut prelude));
 
-        assert_eq!(
-            result.into_iter().last().unwrap(),
-            Some(Value::Number(65.0))
-        )
+        assert_eq!(result.into_iter().last().unwrap(), Value::Number(65.0))
     }
 }

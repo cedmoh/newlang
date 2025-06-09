@@ -47,7 +47,7 @@ impl Runtime {
         self.prelude.insert(name, function);
     }
 
-    pub fn run(&mut self, program: &str) -> Option<Value> {
+    pub fn run(&mut self, program: &str) -> Value {
         let ast = parse_program(program);
 
         evaluate_many(
