@@ -43,6 +43,13 @@ impl Runtime {
         );
 
         prelude.insert(
+            "read".to_string(),
+            InternalFunction {
+                body: Box::new(read),
+            },
+        );
+
+        prelude.insert(
             "eqs".to_string(),
             InternalFunction {
                 body: Box::new(eqs),
