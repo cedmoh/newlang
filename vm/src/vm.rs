@@ -28,12 +28,11 @@ impl VM {
     }
 
     fn pop(&mut self) -> i32 {
-        self.stack_pointer -= 1;
-
         if self.stack_pointer == 0 {
             panic!("Stack underflow: trying to pop from an empty stack.");
         }
 
+        self.stack_pointer -= 1;
         self.stack[self.stack_pointer]
     }
 
@@ -55,12 +54,11 @@ impl VM {
     }
 
     fn pop_call(&mut self) -> usize {
-        self.call_stack_pointer -= 1;
-
         if self.call_stack_pointer == 0 {
             panic!("Call stack underflow: trying to pop from an empty call stack.");
         }
 
+        self.call_stack_pointer -= 1;
         self.call_stack[self.call_stack_pointer]
     }
 
@@ -96,76 +94,67 @@ impl VM {
                     // Save next line on the call stack.
                     // It has to be the next line or we'll end up in an infinite loop.
                     self.push_call(self.instruction_pointer + 1);
-
                     self.goto(line);
                 }
                 Instruction::Ret => {
                     let whence = self.pop_call();
                     self.goto(whence);
                 }
-                // TODO: Implement with push and pop
                 Instruction::Add => {
-                    let a = self.stack[self.stack_pointer - 1];
-                    let b = self.stack[self.stack_pointer - 2];
+                    let a = self.pop();
+                    let b = self.pop();
                     let c = a + b;
-
-                    self.stack[self.stack_pointer - 2] = c;
-                    self.stack_pointer -= 1;
-                    self.instruction_pointer += 1;
+                    self.push(c);
+                    self.step();
                 }
                 Instruction::Subtract => {
-                    let a = self.stack[self.stack_pointer - 1];
-                    let b = self.stack[self.stack_pointer - 2];
-                    let c = b - a;
-
-                    self.stack[self.stack_pointer - 2] = c;
-                    self.stack_pointer -= 1;
-                    self.instruction_pointer += 1;
+                    let a = self.pop();
+                    let b = self.pop();
+                    let c = a - b;
+                    self.push(c);
+                    self.step();
                 }
                 Instruction::Multiply => {
-                    let a = self.stack[self.stack_pointer - 1];
-                    let b = self.stack[self.stack_pointer - 2];
+                    let a = self.pop();
+                    let b = self.pop();
                     let c = a * b;
-
-                    self.stack[self.stack_pointer - 2] = c;
-                    self.stack_pointer -= 1;
-                    self.instruction_pointer += 1;
+                    self.push(c);
+                    self.step();
                 }
                 Instruction::Divide => {
-                    let a = self.stack[self.stack_pointer - 1];
-                    let b = self.stack[self.stack_pointer - 2];
-                    let c = if a == 0 { 0 } else { b / a };
-
-                    self.stack[self.stack_pointer - 2] = c;
-                    self.stack_pointer -= 1;
-                    self.instruction_pointer += 1;
+                    let a = self.pop();
+                    let b = self.pop();
+                    if b == 0 {
+                        panic!("Division by zero error.");
+                    }
+                    let c = a / b;
+                    self.push(c);
+                    self.step();
                 }
                 Instruction::JumpIfTrue(line) => {
-                    let a = self.stack[self.stack_pointer - 1];
+                    let a = self.pop();
                     if a == 1 {
-                        self.instruction_pointer = line;
+                        self.goto(line);
                     } else {
-                        self.instruction_pointer += 1;
+                        self.step();
                     }
-                    self.stack_pointer -= 1;
                 }
                 Instruction::JumpIfFalse(line) => {
-                    let a = self.stack[self.stack_pointer - 1];
+                    let a = self.pop();
                     if a == 0 {
-                        self.instruction_pointer = line;
+                        self.goto(line);
                     } else {
-                        self.instruction_pointer += 1;
+                        self.step();
                     }
-                    self.stack_pointer -= 1;
                 }
                 Instruction::Dealloc(size) => {
                     self.stack_pointer -= size;
-                    self.instruction_pointer += 1;
+                    self.step();
                 }
                 Instruction::Ref(size) => {
                     self.stack[self.stack_pointer] = self.stack[self.stack_pointer - 1 - size];
                     self.stack_pointer += 1;
-                    self.instruction_pointer += 1;
+                    self.step();
                 }
             }
         }
@@ -176,18 +165,88 @@ impl VM {
 
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
+    use crate::instruction;
+
+    use super::Instruction::*;
     use super::*;
 
     #[test]
-    fn test_vm_initialization() {
-        use super::Instruction::*;
-
+    fn two_plus_two() {
         let mut vm = VM::new();
 
-        let instructions = vec![Push(2), Push(2), Add, Debug, Halt];
+        let instructions = vec![
+            // start
+            Push(2),
+            Push(2),
+            Add,
+            Halt,
+        ];
 
         vm.run(&instructions);
+
+        assert_eq!(vm.pop(), 4);
     }
 
-    // Additional tests for the VM functionality would go here
+    #[test]
+    fn go_to() {
+        let mut vm = VM::new();
+
+        let instructions = vec![
+            // start
+            Push(10),
+            Push(20),
+            Add,
+            Jump(5), // Jump to the end
+            Push(3), // This should be skipped
+            Halt,
+        ];
+
+        vm.run(&instructions);
+
+        assert_eq!(vm.pop(), 30);
+    }
+
+    #[test]
+    fn call_and_return() {
+        let mut vm = VM::new();
+
+        let instructions = vec![
+            // start
+            Push(2),
+            Push(2),
+            Call(4),
+            Halt,
+            Add,
+            Ret, // Return to the line after the call
+        ];
+
+        vm.run(&instructions);
+
+        assert_eq!(vm.pop(), 4);
+    }
+
+    #[test]
+    fn conditional_jump() {
+        let mut vm = VM::new();
+
+        let instructions = vec![
+            // start
+            Push(2),
+            Push(2),
+            Subtract,
+            JumpIfFalse(7),
+            Push(402),
+            Push(403),
+            Push(404),
+            Push(200),
+            Halt,
+        ];
+
+        vm.run(&instructions);
+
+        assert_eq!(vm.stack_pointer, 1);
+        assert_eq!(vm.pop(), 200);
+    }
 }
