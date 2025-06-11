@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Instruction {
     Halt,        // Stop execution
     Push(i32),   // Push a value onto the stack

@@ -5,70 +5,105 @@ pub struct VM {
     // Length of the stack
     stack_pointer: usize,
 
-    // Length of the call stack
-    call_stack_pointer: usize,
-
-    // Where I am in the code
-    instruction_pointer: usize,
-
     stack: [i32; 1024],
 
-    call_stack: [usize; 1024],
+    // Where I am
+    instruction_pointer: usize,
+
+    // Where I have been
+    call_stack: [usize; 512],
+
+    // length of the call stack
+    call_stack_pointer: usize,
 }
 
 impl VM {
+    fn push(&mut self, value: i32) {
+        if self.stack_pointer >= self.stack.len() {
+            panic!("Stack overflow: trying to push onto a full stack.");
+        }
+
+        self.stack[self.stack_pointer] = value;
+        self.stack_pointer += 1;
+    }
+
+    fn pop(&mut self) -> i32 {
+        self.stack_pointer -= 1;
+
+        if self.stack_pointer == 0 {
+            panic!("Stack underflow: trying to pop from an empty stack.");
+        }
+
+        self.stack[self.stack_pointer]
+    }
+
+    fn step(&mut self) {
+        self.instruction_pointer += 1;
+    }
+
+    fn goto(&mut self, to: usize) {
+        self.instruction_pointer = to;
+    }
+
+    fn push_call(&mut self, line: usize) {
+        if self.call_stack_pointer >= self.call_stack.len() {
+            panic!("Call stack overflow: trying to push onto a full call stack.");
+        }
+
+        self.call_stack[self.call_stack_pointer] = line;
+        self.call_stack_pointer += 1;
+    }
+
+    fn pop_call(&mut self) -> usize {
+        self.call_stack_pointer -= 1;
+
+        if self.call_stack_pointer == 0 {
+            panic!("Call stack underflow: trying to pop from an empty call stack.");
+        }
+
+        self.call_stack[self.call_stack_pointer]
+    }
+
     pub fn new() -> Self {
         VM {
-            stack_pointer: 0,
             instruction_pointer: 0,
+            stack_pointer: 0,
             stack: [0; 1024],
-            //
             call_stack_pointer: 0,
-            call_stack: [0; 1024],
+            call_stack: [0; 512],
         }
     }
 
     pub fn run(&mut self, instructions: &[Instruction]) {
-        // This is where the main loop of the VM would go
-        // It would read instructions from a bytecode file and execute them
-        loop {
-            if self.instruction_pointer >= instructions.len() {
-                println!("Reached end of instructions.");
-                return;
-            }
-
-            let current_instruction = self.instruction_pointer;
-
-            match instructions[current_instruction] {
-                Instruction::Halt => return,
+        while self.instruction_pointer < instructions.len() {
+            match instructions[self.instruction_pointer] {
+                Instruction::Halt => break,
                 Instruction::Push(value) => {
-                    self.stack[self.stack_pointer] = value;
-                    self.stack_pointer += 1;
-                    self.instruction_pointer += 1;
+                    self.push(value);
+                    self.step();
                 }
                 Instruction::Jump(to) => {
-                    self.instruction_pointer = to;
+                    self.goto(to);
                 }
                 Instruction::Debug => {
-                    println!("stck_ptr  = {:#?}", self.stack_pointer);
-                    println!("cstck_ptr = {:#?}", self.call_stack_pointer);
-                    println!("inst_ptr  = {:#?}", self.instruction_pointer);
-                    println!("stck      = {:?}", &self.stack[..self.stack_pointer]);
-                    println!(
-                        "cstck     = {:?}",
-                        &self.call_stack[..self.call_stack_pointer]
-                    );
-                    self.instruction_pointer += 1;
+                    println!("stck*  = {:#?}", self.stack_pointer);
+                    println!("inst*  = {:#?}", self.instruction_pointer);
+                    println!("stck[] = {:#?}", &self.stack[..self.stack_pointer]);
+
+                    self.step();
                 }
-                Instruction::Call(line_on_stack) => {
-                    self.call_stack[self.call_stack_pointer] = self.instruction_pointer + 1;
-                    self.call_stack_pointer += 1;
-                    self.instruction_pointer = line_on_stack;
+                Instruction::Call(line) => {
+                    // Save next line on the call stack.
+                    // It has to be the next line or we'll end up in an infinite loop.
+                    self.push_call(self.instruction_pointer + 1);
+
+                    self.goto(line);
                 }
                 Instruction::Ret => {
-                    self.call_stack_pointer -= 1;
-                    self.instruction_pointer = self.call_stack[self.call_stack_pointer];
+                    let whence = self.pop_call();
+                    self.goto(whence);
                 }
+                // TODO: Implement with push and pop
                 Instruction::Add => {
                     let a = self.stack[self.stack_pointer - 1];
                     let b = self.stack[self.stack_pointer - 2];
@@ -134,6 +169,8 @@ impl VM {
                 }
             }
         }
+
+        println!("VM finished execution.");
     }
 }
 
