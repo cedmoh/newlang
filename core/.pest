@@ -156,7 +156,7 @@ lv1_ops = _{ multiplication | division }
 lv2_ops = _{ exponent }
 
 // Assignment
-assign = { identifier ~ "=" ~ xp }
+assign = { identifier ~ "=" ~ nls ~ xp }
 
 // Paths
 member         = { member_subject ~ member_object }
@@ -245,8 +245,8 @@ array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 // If
 if_chain     = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
 if_condition = { "("? ~ xp ~ ")"? }
-if_seg       = { if ~ if_condition ~ nls ~ block }
-elsif_seg    = { elsif ~ if_condition ~ nls ~ block }
+if_seg       = { if ~ if_condition ~ do? ~ nls ~ block }
+elsif_seg    = { elsif ~ if_condition ~ do? ~ nls ~ block }
 else_seg     = { else ~ nls ~ block }
 
 // Pattern

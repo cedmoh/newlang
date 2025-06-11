@@ -1,17 +1,33 @@
 #[derive(Debug)]
 pub enum Instruction {
-    Halt,        // Stop execution
-    Push(i32),   // Push a value onto the stack
-    Jump(usize), // Jump to a specific instruction index
-    JumpIfTrue(usize),
-    JumpIfFalse(usize),
-    Debug, // Print the top value of the stack
+    // Stop execution
+    Halt,
+    // Jumpt to a specific instruction index while keeping the current address in the call stack
     Call(usize),
+    // Go back to the call site by popping off of the call stack
     Ret,
-    Add,            // Add the top two values on the stack
-    Subtract,       // Subtract the top value from the second top value on the stack
-    Multiply,       // Multiply the top two values on the stack
-    Divide,         // Divide the second top value by the top value on the stack
-    Dealloc(usize), // Deallocate a number of stack slots
-    Ref(usize),     // Reference a value from the stack
+    // Push a value onto the stack
+    Push(i32),
+    // Add the top two values on the stack
+    Add,
+    // Subtract the top value from the second top value on the stack
+    Subtract,
+    // Multiply the top two values on the stack
+    Multiply,
+    // Divide the second top value by the top value on the stack
+    Divide,
+    // Print the top value of the stack
+    Debug,
+    // Jump to a specific instruction index
+    Jump(usize),
+    // Jump to a specific instruction index if the top of the stack is 1
+    JumpIfTrue(usize),
+    // Jump to a specific instruction index if the top of the stack is 0
+    JumpIfFalse(usize),
+
+    // Set a pin to High (1) or Low (0)
+    SetPin(u8, i32),
+
+    // Sleep for the given amount of time
+    Sleep(u32),
 }

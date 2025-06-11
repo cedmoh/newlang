@@ -1,7 +1,6 @@
 use core::ast::*;
 use std::collections::HashMap;
-use vm::Instruction;
-use vm::Instruction::*;
+use vm::{Instruction, Instruction::*};
 
 pub fn compile_ast(ast: Ast) -> Vec<Instruction> {
     ast.body
@@ -12,65 +11,39 @@ pub fn compile_ast(ast: Ast) -> Vec<Instruction> {
 }
 
 pub fn compile(expression: Expression) -> Vec<Instruction> {
-    let mut instructions = Vec::<Instruction>::new();
-    let mut function_instructions = Vec::<Instruction>::new();
-
-    let function_lengths = HashMap::<String, usize>::new();
-    let function_positions = HashMap::<usize, String>::new();
-
     match expression {
         Expression::Declaration(declaration) => match declaration {
             Declaration::VariableDeclaration(variable) => {
                 todo!()
             }
-            Declaration::FunctionDeclaration(function) => {
-                let mut final_length = 0;
-
-                if let Some(body) = function.body {
-                    instructions.extend(compile_many(body.body.body));
-                }
-
-                instructions.push(Ret);
+            Declaration::FunctionDeclaration(_) => {
+                todo!()
             }
         },
-        Expression::Block(block) => todo!(),
+        Expression::Block(_) => todo!(),
         Expression::Loop(_) => todo!(),
         Expression::While(_) => todo!(),
-        Expression::IfChain(if_chain) => todo!(),
+        Expression::IfChain(_) => todo!(),
         Expression::Match(_) => todo!(),
-        Expression::Member(member) => todo!(),
-        Expression::Call(call) => todo!(),
-        Expression::Identifier(identifier) => todo!(),
-        Expression::Literal(literal) => todo!(),
-        Expression::Dyadic(dyadic) => {
-            instructions.extend(compile(*dyadic.left));
-            instructions.extend(compile(*dyadic.right));
+        Expression::Member(_) => todo!(),
+        Expression::Call(function) => match function.callee.id.as_str() {
+            "setPin" => {
+                // TODO
+                let args = function.arguments.items.into_iter();
 
-            match dyadic.operator {
-                DyadicOperator::Add => {}
-                DyadicOperator::Subtract => todo!(),
-                DyadicOperator::Multiply => todo!(),
-                DyadicOperator::Divide => todo!(),
-                DyadicOperator::Modulo => todo!(),
-                DyadicOperator::Power => todo!(),
-                DyadicOperator::Equal => todo!(),
-                DyadicOperator::NotEqual => todo!(),
-                DyadicOperator::LessThan => todo!(),
-                DyadicOperator::GreaterThan => todo!(),
-                DyadicOperator::LessThanOrEqual => todo!(),
-                DyadicOperator::GreaterThanOrEqual => todo!(),
-                DyadicOperator::And => todo!(),
-                DyadicOperator::Or => todo!(),
+                Instruction::SetPin(5, 5);
+
+                todo!()
             }
-
-            todo!();
-        }
+            _ => todo!(),
+        },
+        Expression::Identifier(_) => todo!(),
+        Expression::Literal(_) => todo!(),
+        Expression::Dyadic(_) => todo!(),
         Expression::Return(_) => todo!(),
         Expression::Break(_) => todo!(),
-        Expression::Assignment(assignment) => todo!(),
-    };
-
-    instructions
+        Expression::Assignment(_) => todo!(),
+    }
 }
 
 pub fn compile_many(expressions: Vec<Expression>) -> Vec<Instruction> {

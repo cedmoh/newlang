@@ -147,15 +147,8 @@ impl VM {
                         self.step();
                     }
                 }
-                Instruction::Dealloc(size) => {
-                    self.stack_pointer -= size;
-                    self.step();
-                }
-                Instruction::Ref(size) => {
-                    self.stack[self.stack_pointer] = self.stack[self.stack_pointer - 1 - size];
-                    self.stack_pointer += 1;
-                    self.step();
-                }
+                Instruction::SetPin(_, _) => todo!(),
+                Instruction::Sleep(_) => todo!(),
             }
         }
 
@@ -165,10 +158,6 @@ impl VM {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
-
-    use crate::instruction;
-
     use super::Instruction::*;
     use super::*;
 
