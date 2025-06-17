@@ -135,6 +135,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "crustal"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5de5c69ca7c5e25f5f13787eca2d2d8d60c1b7b055ea9ef727f5b06185b5a09d"
+
+[[package]]
 name = "crypto-common"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -326,6 +332,7 @@ name = "transpiler"
 version = "0.1.0"
 dependencies = [
  "core",
+ "crustal",
 ]
 
 [[package]]

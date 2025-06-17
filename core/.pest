@@ -31,10 +31,10 @@ mul     = { "mul" }
 div     = { "div" }
 exp     = { "exp" }
 rem     = { "rem" }
-gt      = { "gt" }
 gte     = { "gte" }
-lt      = { "lt" }
+gt      = { "gt" }
 lte     = { "lte" }
+lt      = { "lt" }
 eq      = { "eq" }
 neq     = { "neq" }
 and     = { "and" }
@@ -66,10 +66,10 @@ keyword = {
   | div
   | exp
   | rem
-  | gt
   | gte
-  | lt
+  | gt
   | lte
+  | lt
   | eq
   | neq
   | and
@@ -84,10 +84,10 @@ multiplication         = @{ "*" | mul }
 division               = @{ "/" | div }
 exponent               = @{ "^" | exp }
 modulo                 = @{ "%" | rem }
-greater_than           = @{ ">" | gt }
 greater_than_or_equals = @{ ">=" | gte }
-less_than              = @{ "<" | lt }
+greater_than           = @{ ">" | gt }
 less_than_or_equals    = @{ "<=" | lte }
+less_than              = @{ "<" | lt }
 equals                 = @{ "==" | eq }
 not_equals             = @{ "!=" | neq }
 logic_and              = @{ "&&" | and }
@@ -100,10 +100,10 @@ op                     = _{
   | division
   | exponent
   | modulo
-  | greater_than
   | greater_than_or_equals
-  | less_than
+  | greater_than
   | less_than_or_equals
+  | less_than
   | equals
   | not_equals
   | logic_and
@@ -177,7 +177,7 @@ call_arguments =  { xp ~ ("," ~ xp)* }
 dl = { var_dl | fn_dl }
 
 // Identifiers
-identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
 // Blocks
 block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }
