@@ -44,27 +44,27 @@ mod tests {
         let ast = parse_program(
             "setup fn {
                 pinMode LED_BUILTIN, OUTPUT
-                pinMode 11, OUTPUT
-                pinMode 12, OUTPUT
-                pinMode 13, OUTPUT
-                pinMode 12, OUTPUT
-                pinMode 15, OUTPUT
             }
 
-            current int var 11
+            duration float var 1000
+            is_rising bool var false
 
             run fn {
-                digitalWrite current, LOW
+                duration = if is_rising 
+                    do { duration mul 2 }
+                    else { duration div 2 }
 
-                current =
-                    if current gte 15 { 11 }
-                    else { current add 1 }
+                # Turn On
+                digitalWrite LED_BUILTIN, LOW
+                delay duration
 
-                digitalWrite current, HIGH
+                # Turn Off
+                digitalWrite LED_BUILTIN, HIGH 
+                delay duration
 
-                digitalWrite LED_BUILTIN, if current eq 11 { HIGH } else { LOW }
-
-                delay 500
+                # Toggle direction
+                is_rising = if duration gt 1000 { false } else { is_rising }
+                is_rising = if duration lt 1 { true } else { is_rising }
             }",
         );
 

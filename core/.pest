@@ -245,8 +245,8 @@ array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 // If
 if_chain     = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
 if_condition = { "("? ~ xp ~ ")"? }
-if_seg       = { if ~ if_condition ~ do? ~ nls ~ block }
-elsif_seg    = { elsif ~ if_condition ~ do? ~ nls ~ block }
+if_seg       = { if ~ if_condition ~ nls ~ do? ~ nls ~ block }
+elsif_seg    = { elsif ~ if_condition ~ nls ~ do? ~ nls ~ block }
 else_seg     = { else ~ nls ~ block }
 
 // Pattern
