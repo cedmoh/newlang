@@ -9,6 +9,6 @@ pub fn read(_params: Vec<Value>) -> Value {
         return Value::Nil;
     }
 
-    // Trim the input and return it as a Value.
+    // Return the input as a string Value.
     Value::String(input.to_string())
 }

@@ -1,19 +1,21 @@
 use crate::eval::Value;
 
-pub fn print(params: Vec<Value>) -> Value {
+pub fn log(params: Vec<Value>) -> Value {
     match params {
         ps if ps.is_empty() => {
-            // Do nothing if no parameters are given
+            // Print a newline if no parameters are given
+            println!();
         }
         ps => {
             // Print each parameter followed by a space
             let joined = ps
                 .iter()
-                .map(|p| p.to_string())
+                .map(|p| p.to_debug_string())
                 .collect::<Vec<String>>()
-                .join("\n");
+                .join(" ");
 
             print!("{}", joined);
+            println!();
         }
     }
 

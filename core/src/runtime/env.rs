@@ -50,6 +50,13 @@ impl Runtime {
         );
 
         prelude.insert(
+            "log".to_string(),
+            InternalFunction {
+                body: Box::new(log),
+            },
+        );
+
+        prelude.insert(
             "eqs".to_string(),
             InternalFunction {
                 body: Box::new(eqs),

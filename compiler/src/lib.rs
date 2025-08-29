@@ -1,6 +1,5 @@
 use core::ast::*;
-use std::collections::HashMap;
-use vm::{Instruction, Instruction::*};
+use vm::Instruction;
 
 pub fn compile_ast(ast: Ast) -> Vec<Instruction> {
     ast.body
@@ -30,8 +29,6 @@ pub fn compile(expression: Expression) -> Vec<Instruction> {
             "setPin" => {
                 // TODO
                 let args = function.arguments.items.into_iter();
-
-                Instruction::SetPin(5, 5);
 
                 todo!()
             }
