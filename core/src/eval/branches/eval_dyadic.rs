@@ -14,6 +14,9 @@ pub fn eval_dyadic(
     match dyadic.operator {
         DyadicOperator::Add => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left + right),
+            (Value::String(left), Value::String(right)) => {
+                Value::String(format!("{}{}", left, right))
+            }
             (x, y) => panic!("Invalid operands for add: {:?} and {:?}", x, y),
         },
         DyadicOperator::Subtract => match (left, right) {

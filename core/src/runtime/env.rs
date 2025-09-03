@@ -29,9 +29,9 @@ impl Runtime {
         use crate::runtime::std::*;
 
         prelude.insert(
-            "write".to_string(),
+            "format".to_string(),
             InternalFunction {
-                body: Box::new(write),
+                body: Box::new(format),
             },
         );
 

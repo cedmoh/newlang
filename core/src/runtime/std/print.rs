@@ -1,4 +1,5 @@
 use crate::eval::Value;
+use std::io::{self, Write};
 
 pub fn print(params: Vec<Value>) -> Value {
     match params {
@@ -14,6 +15,8 @@ pub fn print(params: Vec<Value>) -> Value {
                 .join("\n");
 
             print!("{}", joined);
+
+            io::stdout().flush().unwrap(); // Write to stdout immediately
         }
     }
 

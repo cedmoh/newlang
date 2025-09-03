@@ -18,7 +18,6 @@ pub fn make_literal(pair: Pair<Rule>) -> Literal {
                 .next()
                 .expect("Expected string content")
                 .as_str()
-                .trim()
                 .to_string();
 
             Literal::String(StringLiteral {

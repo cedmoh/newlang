@@ -212,7 +212,7 @@ var_initial    =  { xp }
 var_nomination = _{ var_name ~ var_type? ~ val_or_var }
 
 // Literals
-lit         = {
+lit         =  {
   
   | nil_lit
   | array_lit
@@ -223,9 +223,9 @@ lit         = {
   | number_lit
   | hexadecimal_lit
 }
-nil_lit     = { nil }
-string_lit  = { "'" ~ string_text ~ "'" }
-string_text = { (!"'" ~ ANY)* }
+nil_lit     =  { nil }
+string_lit  =  { "'" ~ string_text ~ "'" }
+string_text = @{ (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
 character_lit      =  { "^" ~ ANY }
 number_lit         = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
