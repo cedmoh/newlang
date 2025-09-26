@@ -26,13 +26,28 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         }
         Rule::while_flow => {
             let mut inner = pair.into_inner();
-            let condition_pair = inner.next().expect("Expected a condition in while_flow");
-            let block_pair = inner.next().expect("Expected a block in while_flow");
-            let condition = make_expression(condition_pair);
-            let body = make_block(block_pair);
+            let condition_pair = inner
+                .next()
+                .expect("Expected a while_condition in while_flow");
+            let body_pair = inner.next().expect("Expected a while_body in while_flow");
+
+            let condition = make_expression(
+                condition_pair
+                    .into_inner()
+                    .next()
+                    .expect("Expected an expression in while_condition"),
+            );
+
+            let body = make_expression(
+                body_pair
+                    .into_inner()
+                    .next()
+                    .expect("Expected an expression in while_body"),
+            );
+
             Expression::While(While {
                 condition: Box::new(condition),
-                body,
+                body: Box::new(body),
             })
         }
         Rule::if_condition => {
