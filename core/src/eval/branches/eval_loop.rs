@@ -1,6 +1,6 @@
 use crate::{
     ast::Loop,
-    eval::{Functions, Prelude, Variables, evaluate_many},
+    eval::{Functions, Prelude, Variables, evaluate},
 };
 
 pub fn eval_loop(
@@ -10,6 +10,6 @@ pub fn eval_loop(
     r#loop: Loop,
 ) -> ! {
     loop {
-        evaluate_many(r#loop.body.body.clone(), vars, fns, prelude);
+        evaluate(*r#loop.body.clone(), vars, fns, prelude);
     }
 }

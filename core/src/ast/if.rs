@@ -1,4 +1,3 @@
-use super::Block;
 use super::Expression;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -10,13 +9,13 @@ pub struct IfChain {
 pub enum IfBranch {
     If {
         condition: Box<Expression>,
-        body: Block,
+        body: Box<Expression>,
     },
     ElseIf {
         condition: Box<Expression>,
-        body: Block,
+        body: Box<Expression>,
     },
     Else {
-        body: Block,
+        body: Box<Expression>,
     },
 }

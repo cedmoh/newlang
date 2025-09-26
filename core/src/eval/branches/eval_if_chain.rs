@@ -1,6 +1,6 @@
 use crate::{
     ast::{IfBranch, IfChain},
-    eval::{Functions, Prelude, Value, Variables, evaluate, evaluate_many},
+    eval::{Functions, Prelude, Value, Variables, evaluate},
 };
 
 pub fn eval_if_chain(
@@ -15,10 +15,10 @@ pub fn eval_if_chain(
                 let evaluated_condition = evaluate(*condition, vars, fns, prelude);
 
                 if let Value::Boolean(true) = evaluated_condition {
-                    return evaluate_many(body.body, vars, fns, prelude);
+                    return evaluate(*body, vars, fns, prelude);
                 };
             }
-            IfBranch::Else { body } => return evaluate_many(body.body, vars, fns, prelude),
+            IfBranch::Else { body } => return evaluate(*body, vars, fns, prelude),
         }
     }
 

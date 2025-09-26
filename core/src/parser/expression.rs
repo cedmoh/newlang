@@ -1,4 +1,3 @@
-use super::block::make_block;
 use super::declaration::make_declaration;
 use super::literal::make_literal;
 use super::operation::make_dyadic_operator;
@@ -20,9 +19,18 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
         }
         Rule::loop_flow => {
             let mut inner = pair.into_inner();
-            let block_pair = inner.next().expect("Expected a block in loop_flow");
-            let body = make_block(block_pair);
-            Expression::Loop(Loop { body })
+            let body_pair = inner.next().expect("Expected loop_body in loop_flow");
+
+            let body = make_expression(
+                body_pair
+                    .into_inner()
+                    .next()
+                    .expect("Expected an expression in loop_body"),
+            );
+
+            Expression::Loop(Loop {
+                body: Box::new(body),
+            })
         }
         Rule::while_flow => {
             let mut inner = pair.into_inner();
@@ -58,6 +66,10 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                     .expect("Expected an expression in if_condition"),
             )
         }
+        Rule::if_body | Rule::elsif_body | Rule::else_body => {
+            let mut inner = pair.into_inner();
+            make_expression(inner.next().expect("Expected an expression in if_body"))
+        }
         Rule::if_seg | Rule::elsif_seg | Rule::else_seg => {
             unreachable!("if_seg, elsif_seg, and else_seg were assumed to be silenced.");
         }
@@ -72,11 +84,11 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                         let body = inner.next().expect("Expected a body in if_seg");
 
                         let condition_expr = make_expression(condition);
-                        let body_expr = make_block(body);
+                        let body_expr = make_expression(body);
 
                         IfBranch::If {
                             condition: Box::new(condition_expr),
-                            body: body_expr,
+                            body: Box::new(body_expr),
                         }
                     }
                     Rule::elsif_seg => {
@@ -86,11 +98,11 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                         let body = inner.next().expect("Expected a body in elsif_seg");
 
                         let condition_expr = make_expression(condition);
-                        let body_expr = make_block(body);
+                        let body_expr = make_expression(body);
 
                         IfBranch::ElseIf {
                             condition: Box::new(condition_expr),
-                            body: body_expr,
+                            body: Box::new(body_expr),
                         }
                     }
                     Rule::else_seg => {
@@ -99,9 +111,11 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                             .next()
                             .expect("Expected a body in else_seg");
 
-                        let body_expr = make_block(body);
+                        let body_expr = make_expression(body);
 
-                        IfBranch::Else { body: body_expr }
+                        IfBranch::Else {
+                            body: Box::new(body_expr),
+                        }
                     }
                     _ => panic!("Unexpected rule in if_chain: {:?}", branch.as_rule()),
                 })

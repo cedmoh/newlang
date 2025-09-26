@@ -50,12 +50,12 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
                     value: 5.0
                 })),]
             },
-            ast,
         )
     }
 
@@ -65,6 +65,7 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::Dyadic(Dyadic {
                     operator: DyadicOperator::Add,
@@ -76,7 +77,6 @@ mod tests {
                     })))
                 })]
             },
-            ast,
         );
     }
 
@@ -88,6 +88,7 @@ mod tests {
         dbg!(ast.clone());
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::Dyadic(Dyadic {
                     operator: DyadicOperator::Add,
@@ -105,7 +106,6 @@ mod tests {
                     }))
                 })]
             },
-            ast
         );
     }
 
@@ -115,6 +115,7 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::Declaration(Declaration::VariableDeclaration(
                     VariableDeclaration {
@@ -129,7 +130,6 @@ mod tests {
                     }
                 ))]
             },
-            ast,
         );
     }
 
@@ -139,6 +139,7 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::IfChain(IfChain {
                     branches: vec![
@@ -146,33 +147,32 @@ mod tests {
                             condition: Box::new(Expression::Literal(Literal::Boolean(
                                 BooleanLiteral { value: true }
                             ))),
-                            body: Block {
+                            body: Box::new(Expression::Block(Block {
                                 body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
                                     value: 1.0
                                 }))]
-                            }
+                            }))
                         },
                         IfBranch::ElseIf {
                             condition: Box::new(Expression::Literal(Literal::Boolean(
                                 BooleanLiteral { value: false }
                             ))),
-                            body: Block {
+                            body: Box::new(Expression::Block(Block {
                                 body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
                                     value: 2.0
                                 }))]
-                            }
+                            }))
                         },
                         IfBranch::Else {
-                            body: Block {
+                            body: Box::new(Expression::Block(Block {
                                 body: vec![Expression::Literal(Literal::Decimal(DecimalLiteral {
                                     value: 3.0
                                 }))]
-                            }
+                            }))
                         }
                     ]
                 })]
             },
-            ast,
         );
     }
 
@@ -182,6 +182,7 @@ mod tests {
         let ast = parse_program(input);
 
         assert_eq!(
+            ast,
             Ast {
                 body: vec![Expression::Declaration(Declaration::FunctionDeclaration(
                     FunctionDeclaration {
@@ -218,7 +219,6 @@ mod tests {
                     }
                 ))]
             },
-            ast,
         );
     }
 }

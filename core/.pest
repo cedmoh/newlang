@@ -247,11 +247,15 @@ unnamed_tuple_term =  { xp }
 array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 
 // If
-if_chain     = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
-if_condition = { "("? ~ xp ~ ")"? }
-if_seg       = { if ~ if_condition ~ nls ~ do? ~ nls ~ xp }
-elsif_seg    = { elsif ~ if_condition ~ nls ~ do? ~ nls ~ xp }
-else_seg     = { else ~ nls ~ block }
+if_chain        = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
+if_condition    = { "("? ~ xp ~ ")"? }
+if_seg          = { if ~ if_condition ~ nls ~ do? ~ nls ~ if_body }
+if_body         = { xp }
+elsif_seg       = { elsif ~ if_condition ~ nls ~ do? ~ nls ~ elsif_body }
+elsif_condition = { "("? ~ xp ~ ")"? }
+elsif_body      = { xp }
+else_seg        = { else ~ nls ~ else_body }
+else_body       = { xp }
 
 // Pattern
 pattern               = {
