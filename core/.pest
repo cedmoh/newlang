@@ -134,26 +134,6 @@ evaluation  = _{
 }
 broken_xp   =  { br ~ xp? }
 returned_xp =  { ret ~ xp? }
-// Level System is Unused
-lv0     =  { lv1 ~ (lv0_ops ~ lv0)? }
-lv1     =  { lv2 ~ (lv1_ops ~ lv1)? }
-lv2     =  { lv3 ~ (lv2_ops ~ lv2)? }
-lv3     =  {
-  
-  | block
-  | loop_block
-  | while_block
-  | if_chain
-  | match_xp
-  | member
-  | call
-  | identifier
-  | lit
-  | "(" ~ xp ~ ")"
-}
-lv0_ops = _{ addition | subtraction }
-lv1_ops = _{ multiplication | division }
-lv2_ops = _{ exponent }
 
 // Assignment
 assign = { identifier ~ "=" ~ nls ~ xp }
