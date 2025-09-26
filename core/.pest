@@ -8,11 +8,13 @@ val = @{ "val" }
 fn  = _{ "fn" }
 // control flow
 do    = _{ "do" }
-ret   = @{ "ret" }
-for   = @{ "for" }
+end   = _{ "end" }
+ret   = _{ "ret" }
+for   = _{ "for" }
+in    = _{ "in" }
 while = _{ "while" }
 loop  = _{ "loop" }
-br    = @{ "br" }
+br    = _{ "br" }
 cont  = @{ "cont" }
 if    = _{ "if" }
 elsif = _{ "elsif" }
@@ -45,8 +47,10 @@ keyword = {
   | val
   | fn
   | do
+  | end
   | ret
   | for
+  | in
   | while
   | loop
   | br
@@ -117,20 +121,37 @@ operand   = { evaluation }
 // Expressions
 xps         = _{ (nls ~ xp ~ nls)+ }
 xp          =  { operation | evaluation }
+par_xp      = _{ "(" ~ xp ~ ")" }
 evaluation  = _{
   
   | assign
   | block
   | dl
-  | loop_block
-  | while_block
+  | loop_flow
+  | while_flow
+  | for_flow
   | if_chain
   | match_xp
   | member
   | call
   | identifier
   | lit
-  | "(" ~ xp ~ ")"
+  | par_xp
+}
+call_xp     = _{
+  
+  | assign
+  | dl
+  | loop_flow
+  | while_flow
+  | for_flow
+  | if_chain
+  | match_xp
+  | member
+  | call
+  | identifier
+  | lit
+  | par_xp
 }
 broken_xp   =  { br ~ xp? }
 returned_xp =  { ret ~ xp? }
@@ -147,11 +168,14 @@ index_access   = { "[" ~ xp ~ "]" }
 tuple_access   = { ASCII_DIGIT+ }
 
 // Call
-call           =  { callee ~ call_generics? ~ ("()" | "("? ~ call_arguments ~ ")"?) }
-call_generics  =  { "<" ~ generic_param+ ~ ">" }
-generic_param  = @{ identifier }
-callee         = @{ identifier }
-call_arguments =  { xp ~ ("," ~ xp)* }
+call            =  { callee ~ call_generics? ~ (call_args_empty | call_args) }
+call_generics   =  { "<" ~ generic_param+ ~ ">" }
+generic_param   = @{ identifier }
+callee          = @{ identifier }
+call_args       =  { call_args_empty | args_par | args_naked }
+call_args_empty = _{ "(" ~ nls ~ ")" }
+args_par        = _{ "(" ~ nls ~ xp ~ nls ~ (nls ~ "," ~ nls ~ xp)* ~ nls ~ ")" }
+args_naked      = _{ call_xp ~ (nls ~ "," ~ call_xp)* }
 
 // Declaration
 dl = { var_dl | fn_dl }
@@ -225,8 +249,8 @@ array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
 // If
 if_chain     = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
 if_condition = { "("? ~ xp ~ ")"? }
-if_seg       = { if ~ if_condition ~ nls ~ do? ~ nls ~ block }
-elsif_seg    = { elsif ~ if_condition ~ nls ~ do? ~ nls ~ block }
+if_seg       = { if ~ if_condition ~ nls ~ do? ~ nls ~ xp }
+elsif_seg    = { elsif ~ if_condition ~ nls ~ do? ~ nls ~ xp }
 else_seg     = { else ~ nls ~ block }
 
 // Pattern
@@ -252,10 +276,20 @@ match_block = { "{" ~ nls ~ (match_arm ~ "," ~ nls)* ~ (match_arm ~ ","?)? ~ nls
 match_arm   = { pattern ~ do ~ xp }
 
 // Loop
-loop_block = { loop ~ nls ~ block }
+loop_flow = { loop ~ nls ~ loop_body }
+loop_body = { xp }
 
 // While
-while_block = { while ~ xp ~ do? ~ nls ~ block }
+while_flow      = { while ~ nls ~ while_condition ~ nls ~ while_body }
+while_condition = { xp }
+while_body      = { xp }
+
+// For
+for_flow = { for ~ nls ~ for_item ~ nls ~ in ~ nls ~ for_iter ~ nls ~ for_body }
+for_item = { identifier }
+// TODO: should be pattern
+for_iter = { xp }
+for_body = { xp }
 
 // Comments
 COMMENT             = _{ !hexadecimal_lit ~ (multi_comment | inline_comment | single_comment) ~ nls }

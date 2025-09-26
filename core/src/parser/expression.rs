@@ -18,16 +18,16 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
 
             Expression::Block(Block { body })
         }
-        Rule::loop_block => {
+        Rule::loop_flow => {
             let mut inner = pair.into_inner();
-            let block_pair = inner.next().expect("Expected a block in loop_block");
+            let block_pair = inner.next().expect("Expected a block in loop_flow");
             let body = make_block(block_pair);
             Expression::Loop(Loop { body })
         }
-        Rule::while_block => {
+        Rule::while_flow => {
             let mut inner = pair.into_inner();
-            let condition_pair = inner.next().expect("Expected a condition in while_block");
-            let block_pair = inner.next().expect("Expected a block in while_block");
+            let condition_pair = inner.next().expect("Expected a condition in while_flow");
+            let block_pair = inner.next().expect("Expected a block in while_flow");
             let condition = make_expression(condition_pair);
             let body = make_block(block_pair);
             Expression::While(While {
@@ -131,8 +131,8 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                 },
             })
         }
-        Rule::callee | Rule::call_arguments => {
-            unreachable!("callee and call_arguments assumed be handled in the call branch.");
+        Rule::callee | Rule::call_args => {
+            unreachable!("callee and call_args assumed be handled in the call branch.");
         }
         Rule::op => {
             unreachable!("op assumed to be silenced.");
