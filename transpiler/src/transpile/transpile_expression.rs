@@ -19,6 +19,7 @@ pub fn transpile_expression(expr: Expression) -> C::Expr {
         Expression::Return(_) => todo!(),
         Expression::Break(_) => todo!(),
         Expression::Assignment(assignment) => transpile_assignment(assignment),
+        Expression::For(_) => todo!(),
     }
 }
 

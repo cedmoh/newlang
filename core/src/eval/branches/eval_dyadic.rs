@@ -56,6 +56,7 @@ pub fn eval_dyadic(
             (Value::String(left), Value::String(right)) => Value::Boolean(left == right),
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left == right),
             (Value::Character(left), Value::Character(right)) => Value::Boolean(left == right),
+            (Value::Map(left), Value::Map(right)) => Value::Boolean(left == right),
             (Value::Nil, Value::Nil) => Value::Boolean(true),
             (x, y) => panic!("Invalid operands for equal: {:?} and {:?}", x, y),
         },
@@ -63,6 +64,9 @@ pub fn eval_dyadic(
             (Value::Number(left), Value::Number(right)) => Value::Boolean(left != right),
             (Value::String(left), Value::String(right)) => Value::Boolean(left != right),
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left != right),
+            (Value::Character(left), Value::Character(right)) => Value::Boolean(left != right),
+            (Value::Map(left), Value::Map(right)) => Value::Boolean(left != right),
+            (Value::Nil, Value::Nil) => Value::Boolean(false),
             (x, y) => panic!("Invalid operands for not equals: {:?} and {:?}", x, y),
         },
         DyadicOperator::LessThan => match (left, right) {
