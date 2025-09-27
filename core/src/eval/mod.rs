@@ -2,12 +2,14 @@ mod branches;
 mod call;
 mod functions;
 mod prelude;
+mod types;
 mod value;
 mod variables;
 
 pub use call::*;
 pub use functions::*;
 pub use prelude::*;
+pub use types::*;
 pub use value::*;
 pub use variables::*;
 

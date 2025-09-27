@@ -1,13 +1,43 @@
 use colored::Colorize;
 use std::fmt::Display;
 
-#[derive(Debug, Clone, PartialEq)]
+use crate::eval::MiMap;
+
+#[derive(Debug, Clone)]
 pub enum Value {
     Number(f64),
     Boolean(bool),
     Character(char),
     String(String),
+    Map(MiMap),
     Nil,
+}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            (Value::Number(a), Value::Number(b)) => a.partial_cmp(b),
+            (Value::Boolean(a), Value::Boolean(b)) => a.partial_cmp(b),
+            (Value::Character(a), Value::Character(b)) => a.partial_cmp(b),
+            (Value::String(a), Value::String(b)) => a.partial_cmp(b),
+            (Value::Nil, Value::Nil) => Some(std::cmp::Ordering::Equal),
+            _ => None, // Other types are not comparable
+        }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Value::Number(a), Value::Number(b)) => a == b,
+            (Value::Boolean(a), Value::Boolean(b)) => a == b,
+            (Value::Character(a), Value::Character(b)) => a == b,
+            (Value::String(a), Value::String(b)) => a == b,
+            (Value::Map(a), Value::Map(b)) => a == b,
+            (Value::Nil, Value::Nil) => true,
+            _ => false, // Different types are not equal
+        }
+    }
 }
 
 impl Display for Value {
@@ -17,6 +47,7 @@ impl Display for Value {
             Value::Boolean(e) => write!(f, "{}", e),
             Value::Character(e) => write!(f, "{}", e),
             Value::String(e) => write!(f, "{}", e),
+            Value::Map(e) => write!(f, "{:?}", e),
             Value::Nil => write!(f, "nil"),
         }
     }
@@ -29,6 +60,7 @@ impl Value {
             Value::Boolean(e) => format!("{}", e.to_string().yellow()),
             Value::Character(e) => format!("'{}'", e.to_string().bright_green()),
             Value::String(e) => format!("'{}'", e.to_string().green()),
+            Value::Map(e) => format!("{:?}", e),
             Value::Nil => "nil".to_string().dimmed().italic().to_string(),
         }
     }
