@@ -1,4 +1,5 @@
-use std::collections::BTreeMap;
+use colored::Colorize;
+use std::{collections::BTreeMap, fmt::Display};
 
 use crate::eval::Value;
 
@@ -13,6 +14,28 @@ pub enum MiMapKey {
     Boolean(bool),
     Character(char),
     String(String),
+}
+
+impl MiMapKey {
+    pub fn to_debug_string(&self) -> String {
+        match self {
+            MiMapKey::Integer(i) => format!("{}", i.to_string().purple().italic()),
+            MiMapKey::Boolean(b) => format!("{}", b.to_string().purple().italic()),
+            MiMapKey::Character(c) => format!("'{}'", c.to_string().magenta().italic()),
+            MiMapKey::String(s) => format!("'{}'", s.to_string().purple().italic()),
+        }
+    }
+}
+
+impl Display for MiMapKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MiMapKey::Integer(i) => write!(f, "{}", i),
+            MiMapKey::Boolean(b) => write!(f, "{}", b),
+            MiMapKey::Character(c) => write!(f, "{}", c),
+            MiMapKey::String(s) => write!(f, "{}", s),
+        }
+    }
 }
 
 impl From<Value> for MiMapKey {
@@ -48,5 +71,18 @@ impl MiMap {
     pub fn insert(&mut self, key: Value, value: Value) {
         let key = MiMapKey::from(key);
         self.inner.insert(key, value);
+    }
+
+    pub fn get(&self, key: &Value) -> Option<&Value> {
+        let key = MiMapKey::from(key.clone());
+        self.inner.get(&key)
+    }
+
+    pub fn drain(&self) -> impl Iterator<Item = (MiMapKey, Value)> + '_ {
+        self.inner.iter().map(|(k, v)| (k.clone(), v.clone()))
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
     }
 }

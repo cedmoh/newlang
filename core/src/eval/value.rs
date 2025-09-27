@@ -47,7 +47,7 @@ impl Display for Value {
             Value::Boolean(e) => write!(f, "{}", e),
             Value::Character(e) => write!(f, "{}", e),
             Value::String(e) => write!(f, "{}", e),
-            Value::Map(e) => write!(f, "{:?}", e),
+            Value::Map(e) => write!(f, "[Map with {} entries]", e.len()),
             Value::Nil => write!(f, "nil"),
         }
     }
@@ -60,7 +60,27 @@ impl Value {
             Value::Boolean(e) => format!("{}", e.to_string().yellow()),
             Value::Character(e) => format!("'{}'", e.to_string().bright_green()),
             Value::String(e) => format!("'{}'", e.to_string().green()),
-            Value::Map(e) => format!("{:?}", e),
+            Value::Map(e) => {
+                // Format the map as { key1: value1, key2: value2, ... }
+                let entries: Vec<String> = e
+                    .drain()
+                    .map(|(k, v)| {
+                        format!(
+                            "{}{} {}",
+                            k.to_debug_string(),
+                            ":".bold(),
+                            v.to_debug_string()
+                        )
+                    })
+                    .collect();
+
+                format!(
+                    "{} {} {}",
+                    "[".dimmed(),
+                    entries.join(&", ".dimmed().to_string()),
+                    "]".dimmed()
+                )
+            }
             Value::Nil => "nil".to_string().dimmed().italic().to_string(),
         }
     }

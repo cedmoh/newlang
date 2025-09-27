@@ -62,6 +62,13 @@ impl Runtime {
                 body: Box::new(eqs),
             },
         );
+
+        prelude.insert(
+            "range".to_string(),
+            InternalFunction {
+                body: Box::new(range),
+            },
+        );
     }
 
     pub fn add_variable(&mut self, name: String, value: Value) {
