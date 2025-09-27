@@ -58,6 +58,38 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                 body: Box::new(body),
             })
         }
+        Rule::for_flow => {
+            let mut inner = pair.into_inner();
+            let identifier_pair = inner.next().expect("Expected an identifier in for_flow");
+
+            let iterable_pair = inner.next().expect("Expected an iterable in for_flow");
+
+            let body_pair = inner.next().expect("Expected a for_body in for_flow");
+
+            let identifier = Identifier {
+                id: identifier_pair.as_str().to_string(),
+            };
+
+            let iterable = make_expression(
+                iterable_pair
+                    .into_inner()
+                    .next()
+                    .expect("Expected an expression in iterable"),
+            );
+
+            let body = make_expression(
+                body_pair
+                    .into_inner()
+                    .next()
+                    .expect("Expected an expression in for_body"),
+            );
+
+            Expression::For(For {
+                item: identifier,
+                iterator: Box::new(iterable),
+                body: Box::new(body),
+            })
+        }
         Rule::if_condition => {
             let mut inner = pair.into_inner();
             make_expression(

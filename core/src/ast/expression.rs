@@ -6,6 +6,7 @@ pub enum Expression {
     Declaration(Declaration),
     Loop(Loop),
     While(While),
+    For(For),
     IfChain(IfChain),
     Match(Match),
     Member(Member),

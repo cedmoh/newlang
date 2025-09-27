@@ -27,6 +27,7 @@ pub fn evaluate(
         Expression::Declaration(declaration) => eval_declaration(vars, fns, prelude, declaration),
         Expression::Loop(r#loop) => eval_loop(vars, fns, prelude, r#loop),
         Expression::While(r#while) => eval_while(vars, fns, prelude, r#while),
+        Expression::For(r#for) => eval_for(vars, fns, prelude, r#for),
         Expression::IfChain(if_chain) => eval_if_chain(vars, fns, prelude, if_chain),
         Expression::Call(call) => eval_call(vars, fns, prelude, call),
         Expression::Identifier(identifier) => eval_identifier(vars, fns, prelude, identifier),
