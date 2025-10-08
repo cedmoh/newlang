@@ -41,6 +41,8 @@ pub fn transpile_dyadic(dy: Dyadic) -> C::Expr {
             DyadicOperator::GreaterThanOrEqual => ">=",
             DyadicOperator::And => "&&",
             DyadicOperator::Or => "||",
+            DyadicOperator::RangeInclusive => todo!(),
+            DyadicOperator::Range => todo!(),
         }
         .into(),
         transpile_expression(*dy.right),

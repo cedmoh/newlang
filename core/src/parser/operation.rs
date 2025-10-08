@@ -18,6 +18,8 @@ pub fn make_dyadic_operator(pair: Pair<Rule>) -> DyadicOperator {
         Rule::greater_than_or_equals => DyadicOperator::GreaterThanOrEqual,
         Rule::logic_and => DyadicOperator::And,
         Rule::logic_or => DyadicOperator::Or,
+        Rule::range_incl => DyadicOperator::RangeInclusive,
+        Rule::range => DyadicOperator::Range,
         _ => {
             panic!("Unexpected rule for dyadic operator: {:?}", pair.as_rule());
         }

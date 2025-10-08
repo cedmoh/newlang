@@ -11,7 +11,6 @@ mod transpile_type;
 pub use {
     transpile_assignment::*, transpile_block::*, transpile_call::*, transpile_declaration::*,
     transpile_expression::*, transpile_ident::*, transpile_if_chain::*, transpile_literal::*,
-    transpile_type::*,
 };
 
 use core::ast::*;

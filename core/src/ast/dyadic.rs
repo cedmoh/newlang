@@ -16,6 +16,8 @@ pub enum DyadicOperator {
     GreaterThanOrEqual,
     And,
     Or,
+    RangeInclusive,
+    Range,
 }
 
 #[derive(Debug, Clone, PartialEq)]

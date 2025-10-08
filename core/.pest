@@ -41,6 +41,8 @@ eq      = { "eq" }
 neq     = { "neq" }
 and     = { "and" }
 or      = { "or" }
+to      = { "to" }
+til     = { "til" }
 keyword = {
   
   | var
@@ -78,6 +80,8 @@ keyword = {
   | neq
   | and
   | or
+  | til
+  | to
 }
 
 // Operators
@@ -96,6 +100,8 @@ equals                 = @{ "==" | eq }
 not_equals             = @{ "!=" | neq }
 logic_and              = @{ "&&" | and }
 logic_or               = @{ "||" | or }
+range_incl             = @{ "..=" | to }
+range                  = @{ ".." | til }
 op                     = _{
   
   | addition
@@ -112,6 +118,8 @@ op                     = _{
   | not_equals
   | logic_and
   | logic_or
+  | range_incl
+  | range
 }
 
 // Operation
@@ -233,7 +241,7 @@ string_text = @{ (!"'" ~ ANY)* }
 // TODO: Implement with c'<char>'
 character_lit      =  { "^" ~ ANY }
 number_lit         = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
-decimal_lit        =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")*)? }
+decimal_lit        =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !".")? }
 hexadecimal_lit    =  { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
 binary_lit         =  { "b" ~ ('0'..'1' | "_")+ }
 octal_lit          =  { "o" ~ ('0'..'7' | "_")+ }

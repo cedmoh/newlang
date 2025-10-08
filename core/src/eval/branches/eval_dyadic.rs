@@ -1,6 +1,6 @@
 use crate::{
     ast::{Dyadic, DyadicOperator},
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{Functions, MiMap, Prelude, Value, Variables, evaluate},
 };
 
 pub fn eval_dyadic(
@@ -102,6 +102,26 @@ pub fn eval_dyadic(
         DyadicOperator::Or => match (left, right) {
             (Value::Boolean(left), Value::Boolean(right)) => Value::Boolean(left || right),
             (x, y) => panic!("Invalid operands for or: {:?} and {:?}", x, y),
+        },
+        DyadicOperator::RangeInclusive => match (left, right) {
+            (Value::Number(left), Value::Number(right)) => {
+                let range: Vec<Value> = (left.floor() as i64..=right.floor() as i64)
+                    .map(|n| Value::Number(n as f64))
+                    .collect();
+
+                Value::Map(MiMap::from_vec(range))
+            }
+            (x, y) => panic!("Invalid operands for range inclusive: {:?} and {:?}", x, y),
+        },
+        DyadicOperator::Range => match (left, right) {
+            (Value::Number(left), Value::Number(right)) => {
+                let range: Vec<Value> = (left.floor() as i64..right.floor() as i64)
+                    .map(|n| Value::Number(n as f64))
+                    .collect();
+
+                Value::Map(MiMap::from_vec(range))
+            }
+            (x, y) => panic!("Invalid operands for range: {:?} and {:?}", x, y),
         },
     }
 }

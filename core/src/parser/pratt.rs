@@ -19,7 +19,8 @@ pub static PRATT_PARSER: LazyLock<PrattParser<Rule>> = LazyLock::new(|| {
         .op(Op::infix(Rule::multiplication, Left)
             | Op::infix(Rule::division, Left)
             | Op::infix(Rule::modulo, Left))
-        .op(Op::infix(Rule::exponent, Right)) // Strongest
+        .op(Op::infix(Rule::exponent, Right))
+        .op(Op::infix(Rule::range, Right) | Op::infix(Rule::range_incl, Right)) // Strongest
 });
 
 #[cfg(test)]
