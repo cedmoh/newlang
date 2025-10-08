@@ -1,5 +1,5 @@
-for num in 0..100 print
-  if eqs num % 3, num % 5, 0 { 'FizzBuzz' }
-  elsif num % 3 eq 0 { 'Fizz' }
-  elsif num % 5 eq 0 { 'Buzz' }
-  else num
+for num in 0..100 
+  print if num % 3 eq 0 and num % 5 eq 0 'FizzBuzz'
+    elsif num % 3 eq 0 'Fizz'
+    elsif num % 5 eq 0 'Buzz'
+    else num
