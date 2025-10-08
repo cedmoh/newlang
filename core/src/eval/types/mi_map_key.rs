@@ -7,7 +7,6 @@ use colored::Colorize;
 pub enum MiMapKey {
     Integer(i32),
     Boolean(bool),
-    Character(char),
     String(String),
 }
 
@@ -16,7 +15,6 @@ impl MiMapKey {
         match self {
             MiMapKey::Integer(i) => format!("{}", i.to_string().purple().italic()),
             MiMapKey::Boolean(b) => format!("{}", b.to_string().purple().italic()),
-            MiMapKey::Character(c) => format!("'{}'", c.to_string().magenta().italic()),
             MiMapKey::String(s) => format!("'{}'", s.to_string().purple().italic()),
         }
     }
@@ -27,7 +25,6 @@ impl Display for MiMapKey {
         match self {
             MiMapKey::Integer(i) => write!(f, "{}", i),
             MiMapKey::Boolean(b) => write!(f, "{}", b),
-            MiMapKey::Character(c) => write!(f, "{}", c),
             MiMapKey::String(s) => write!(f, "{}", s),
         }
     }
@@ -38,9 +35,8 @@ impl From<Value> for MiMapKey {
         match value {
             Value::Number(n) => MiMapKey::Integer(n.floor() as i32),
             Value::Boolean(b) => MiMapKey::Boolean(b),
-            Value::Character(c) => MiMapKey::Character(c),
             Value::String(s) => MiMapKey::String(s),
-            _ => panic!("Unsupported key type for MiMapKey"),
+            x => panic!("Cannot use {} as a key in MiMap", x.to_string()),
         }
     }
 }

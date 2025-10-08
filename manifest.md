@@ -283,16 +283,6 @@ octalValue val o0755
 octalValue val o_0755
 ```
 
-### Character
-
-Character in Literal Assignment:
-
-```
-char val c'A'
-```
-
-**NOTE:** Currently implemented as `^A`.
-
 ## Compound
 
 ### String

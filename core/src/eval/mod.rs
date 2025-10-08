@@ -31,7 +31,7 @@ pub fn evaluate(
         Expression::IfChain(if_chain) => eval_if_chain(vars, fns, prelude, if_chain),
         Expression::Call(call) => eval_call(vars, fns, prelude, call),
         Expression::Identifier(identifier) => eval_identifier(vars, fns, prelude, identifier),
-        Expression::Literal(literal) => eval_literal(literal),
+        Expression::Literal(literal) => eval_literal(vars, fns, prelude, literal),
         Expression::Return(ret) => eval_return(vars, fns, prelude, ret),
         Expression::Dyadic(dyadic) => eval_dyadic(vars, fns, prelude, dyadic),
         Expression::Assignment(assignment) => eval_assignment(vars, fns, prelude, assignment),

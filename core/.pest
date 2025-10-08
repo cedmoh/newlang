@@ -224,35 +224,31 @@ var_initial    =  { xp }
 var_nomination = _{ var_name ~ var_type? ~ val_or_var }
 
 // Literals
-lit         =  {
+lit               =  {
   
   | nil_lit
-  | array_lit
-  | tuple_lit
+  | map_lit
   | boolean_lit
-  | character_lit
   | string_lit
   | number_lit
   | hexadecimal_lit
 }
-nil_lit     =  { nil }
-string_lit  =  { "'" ~ string_text ~ "'" }
-string_text = @{ (!"'" ~ ANY)* }
-// TODO: Implement with c'<char>'
-character_lit      =  { "^" ~ ANY }
-number_lit         = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
-decimal_lit        =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !".")? }
-hexadecimal_lit    =  { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
-binary_lit         =  { "b" ~ ('0'..'1' | "_")+ }
-octal_lit          =  { "o" ~ ('0'..'7' | "_")+ }
-boolean_lit        =  { true | false }
-tuple_lit          =  {
-    !"()" ~ "(" ~ nls ~ (tuple_term ~ ",")+ ~ (tuple_term ~ ","?)? ~ nls ~ ")"
-}
-tuple_term         =  { named_tuple_term | unnamed_tuple_term }
-named_tuple_term   =  { identifier ~ xp }
-unnamed_tuple_term =  { xp }
-array_lit          =  { "[" ~ nls ~ xp? ~ (nls ~ "," ~ nls ~ xp)* ~ "]" }
+nil_lit           =  { nil }
+string_lit        =  { "'" ~ string_text ~ "'" }
+string_text       = @{ (!"'" ~ ANY)* }
+number_lit        = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
+decimal_lit       =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !".")? }
+hexadecimal_lit   =  { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
+binary_lit        =  { "b" ~ ('0'..'1' | "_")+ }
+octal_lit         =  { "o" ~ ('0'..'7' | "_")+ }
+boolean_lit       =  { true | false }
+map_lit           =  { ("[" ~ nls ~ map_entries ~ nls ~ "]") }
+map_entries       =  { map_entry? ~ (nls ~ "," ~ nls ~ map_entry)* ~ nls ~ ","? }
+map_entry         =  { map_entry_keyed | map_entry_unkeyed }
+map_entry_keyed   =  { map_key ~ ":" ~ map_value }
+map_entry_unkeyed =  { map_value }
+map_value         =  { xp }
+map_key           =  { identifier | lit | par_xp }
 
 // If
 if_chain        = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }
