@@ -1,5 +1,5 @@
 use crate::{
-    eval::{Functions, InternalFunction, Prelude, Value, Variables, evaluate_many},
+    eval::{Functions, InternalFunction, MiMap, Prelude, Value, Variables, evaluate_many},
     parser::parse_program,
 };
 
@@ -14,61 +14,75 @@ impl Runtime {
     pub fn new() -> Self {
         let variables = Variables::default();
         let functions = Functions::default();
-        let mut prelude = Prelude::default();
+        let prelude = Prelude::default();
 
-        Runtime::register_std_functions(&mut prelude);
-
-        Runtime {
+        let mut runtime = Self {
             variables,
             functions,
             prelude,
-        }
+        };
+
+        runtime.register_std_functions();
+        runtime.register_std_globals();
+
+        runtime
     }
 
-    fn register_std_functions(prelude: &mut Prelude) {
+    fn register_std_functions(&mut self) {
         use crate::runtime::std::*;
 
-        prelude.insert(
+        self.add_function(
             "format".to_string(),
             InternalFunction {
                 body: Box::new(format),
             },
         );
 
-        prelude.insert(
+        self.add_function(
+            "format".to_string(),
+            InternalFunction {
+                body: Box::new(format),
+            },
+        );
+
+        self.add_function(
             "print".to_string(),
             InternalFunction {
                 body: Box::new(print),
             },
         );
 
-        prelude.insert(
+        self.add_function(
             "read".to_string(),
             InternalFunction {
                 body: Box::new(read),
             },
         );
 
-        prelude.insert(
+        self.add_function(
             "log".to_string(),
             InternalFunction {
                 body: Box::new(log),
             },
         );
 
-        prelude.insert(
+        self.add_function(
             "eqs".to_string(),
             InternalFunction {
                 body: Box::new(eqs),
             },
         );
 
-        prelude.insert(
+        self.add_function(
             "range".to_string(),
             InternalFunction {
                 body: Box::new(range),
             },
         );
+    }
+
+    fn register_std_globals(&mut self) {
+        self.add_variable("Number".to_string(), Value::Map(MiMap::new()));
     }
 
     pub fn add_variable(&mut self, name: String, value: Value) {

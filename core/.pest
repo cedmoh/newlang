@@ -167,13 +167,15 @@ returned_xp =  { ret ~ xp? }
 // Assignment
 assign = { identifier ~ "=" ~ nls ~ xp }
 
-// Paths
-member         = { member_subject ~ member_object }
-member_subject = { member_term }
-member_object  = { ("." ~ (member | member_term | tuple_access)) | index_access }
-member_term    = { (call | block | identifier) }
-index_access   = { "[" ~ xp ~ "]" }
-tuple_access   = { ASCII_DIGIT+ }
+// Member
+member    =  { (member_xp ~ ".")+ ~ member_xp }
+member_xp = _{
+  
+  | call
+  | identifier
+  | lit
+  | par_xp
+}
 
 // Call
 call            =  { callee ~ call_generics? ~ (call_args_empty | call_args) }
@@ -224,7 +226,7 @@ var_initial    =  { xp }
 var_nomination = _{ var_name ~ var_type? ~ val_or_var }
 
 // Literals
-lit               =  {
+lit         =  {
   
   | nil_lit
   | map_lit
@@ -233,22 +235,23 @@ lit               =  {
   | number_lit
   | hexadecimal_lit
 }
-nil_lit           =  { nil }
-string_lit        =  { "'" ~ string_text ~ "'" }
-string_text       = @{ (!"'" ~ ANY)* }
-number_lit        = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
-decimal_lit       =  { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !".")? }
-hexadecimal_lit   =  { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
-binary_lit        =  { "b" ~ ('0'..'1' | "_")+ }
-octal_lit         =  { "o" ~ ('0'..'7' | "_")+ }
-boolean_lit       =  { true | false }
-map_lit           =  { ("[" ~ nls ~ map_entries ~ nls ~ "]") }
-map_entries       =  { map_entry? ~ (nls ~ "," ~ nls ~ map_entry)* ~ nls ~ ","? }
-map_entry         =  { map_entry_keyed | map_entry_unkeyed }
-map_entry_keyed   =  { map_key ~ ":" ~ map_value }
-map_entry_unkeyed =  { map_value }
-map_value         =  { xp }
-map_key           =  { identifier | lit | par_xp }
+nil_lit     =  { nil }
+string_lit  =  { "'" ~ string_text ~ "'" }
+string_text = @{ (!"'" ~ ANY)* }
+number_lit  = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
+// the negation in the end is to protect against cases like `1..3` and `1.abs`
+decimal_lit       = { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !("." | ASCII_ALPHA))? }
+hexadecimal_lit   = { "#" ~ ('a'..'f' | 'A'..'F' | ASCII_DIGIT | "_")+ }
+binary_lit        = { "b" ~ ('0'..'1' | "_")+ }
+octal_lit         = { "o" ~ ('0'..'7' | "_")+ }
+boolean_lit       = { true | false }
+map_lit           = { ("[" ~ nls ~ map_entries ~ nls ~ "]") }
+map_entries       = { map_entry? ~ (nls ~ "," ~ nls ~ map_entry)* ~ nls ~ ","? }
+map_entry         = { map_entry_keyed | map_entry_unkeyed }
+map_entry_keyed   = { map_key ~ ":" ~ map_value }
+map_entry_unkeyed = { map_value }
+map_value         = { xp }
+map_key           = { identifier | lit | par_xp }
 
 // If
 if_chain        = { if_seg ~ nls ~ (elsif_seg ~ nls)* ~ else_seg? }

@@ -36,7 +36,7 @@ pub fn evaluate(
         Expression::Dyadic(dyadic) => eval_dyadic(vars, fns, prelude, dyadic),
         Expression::Assignment(assignment) => eval_assignment(vars, fns, prelude, assignment),
         Expression::Match(_match) => todo!(),
-        Expression::Member(_member) => todo!(),
+        Expression::Member(member) => eval_member(vars, fns, prelude, member),
         Expression::Break(_br) => todo!(),
     }
 }

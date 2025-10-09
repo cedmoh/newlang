@@ -172,7 +172,14 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
             })
         }
         Rule::member => {
-            todo!()
+            let inner = pair.into_inner();
+
+            let chain = inner
+                .into_iter()
+                .map(|p| make_expression(p))
+                .collect::<Vec<Expression>>();
+
+            Expression::Member(Member { chain })
         }
         Rule::call => {
             let mut inner = pair.into_inner();
