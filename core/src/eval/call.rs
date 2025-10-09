@@ -1,6 +1,6 @@
 use crate::{
     ast::Call,
-    eval::{Functions, Prelude, Value, Variables, evaluate, evaluate_many},
+    eval::{Functions, Prelude, Value, Variables, evaluate},
 };
 
 pub fn call_function(
@@ -23,7 +23,13 @@ pub fn call_function(
     if expected_parameter_count != provided_parameter_count {
         panic!(
             "Function {} expected {} parameters, got {} instead.",
-            function.name.id, expected_parameter_count, provided_parameter_count
+            function
+                .name
+                .clone()
+                .and_then(|n| Some(n.id))
+                .unwrap_or("<Anonymous>".to_string()),
+            expected_parameter_count,
+            provided_parameter_count
         );
     }
 
@@ -42,7 +48,7 @@ pub fn call_function(
 
     // FIXME: This will always return the last evaluated expression,
     // fix so that it returns immediately after seeing the first return statement.
-    let evaluation_result = evaluate_many(function_body.body.body, vars, fns, prelude);
+    let evaluation_result = evaluate(*function_body.body, vars, fns, prelude);
 
     for (name, value) in to_be_restored {
         if let Some(value) = value {

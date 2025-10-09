@@ -9,6 +9,7 @@ pub enum Value {
     Boolean(bool),
     String(String),
     Map(MiMap),
+    Function(String),
     Nil,
 }
 
@@ -43,7 +44,8 @@ impl Display for Value {
             Value::Number(e) => write!(f, "{}", e),
             Value::Boolean(e) => write!(f, "{}", e),
             Value::String(e) => write!(f, "{}", e),
-            Value::Map(e) => write!(f, "[Map with {} entries]", e.len()),
+            Value::Map(e) => write!(f, "[Map {}]", e.len()),
+            Value::Function(e) => write!(f, "[Function {}]", e),
             Value::Nil => write!(f, "nil"),
         }
     }
@@ -76,6 +78,7 @@ impl Value {
                     "]".dimmed()
                 )
             }
+            Value::Function(e) => format!("{} fn", e.to_string().cyan()),
             Value::Nil => "nil".to_string().dimmed().italic().to_string(),
         }
     }

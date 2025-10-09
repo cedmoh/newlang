@@ -1,7 +1,6 @@
 use super::expression::make_expression;
 use super::rules::Rule;
 use crate::ast::*;
-use crate::parser::block::make_block;
 use pest::iterators::Pair;
 
 pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
@@ -104,11 +103,14 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
                             .next()
                             .map(|ty| Type::from(ty.as_str()));
                     }
-                    Rule::fn_block => {
+                    Rule::fn_body => {
                         body = Some(FunctionBody {
-                            body: make_block(
-                                inner_pair.into_inner().next().expect("Expected block"),
-                            ),
+                            body: Box::new(make_expression(
+                                inner_pair
+                                    .into_inner()
+                                    .next()
+                                    .expect("Expected expression in function body"),
+                            )),
                         });
                     }
                     _ => {
@@ -121,7 +123,7 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
             }
 
             Declaration::FunctionDeclaration(FunctionDeclaration {
-                name,
+                name: Some(name), // TODO: Handle anonymous functions
                 ty,
                 generic_params: generics,
                 params: params,

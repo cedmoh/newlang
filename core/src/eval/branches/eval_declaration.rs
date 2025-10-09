@@ -2,6 +2,7 @@ use crate::{
     ast::Declaration,
     eval::{Functions, Prelude, Value, Variables, evaluate},
 };
+use nanoid::nanoid;
 
 pub fn eval_declaration(
     vars: &mut Variables,
@@ -24,11 +25,14 @@ pub fn eval_declaration(
             value
         }
         Declaration::FunctionDeclaration(fn_decl) => {
-            let name = fn_decl.name.id.clone();
+            let name = match &fn_decl.name {
+                Some(ident) => ident.id.clone(),
+                None => nanoid!(),
+            };
 
-            fns.insert(name, fn_decl);
+            fns.insert(name.clone(), fn_decl);
 
-            Value::Nil
+            Value::Function(name)
         }
     }
 }

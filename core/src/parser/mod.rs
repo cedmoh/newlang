@@ -186,7 +186,7 @@ mod tests {
             Ast {
                 body: vec![Expression::Declaration(Declaration::FunctionDeclaration(
                     FunctionDeclaration {
-                        name: Identifier::from("myFunction"),
+                        name: Some(Identifier::from("myFunction")),
                         ty: Some(Type::from("MyFunctionType")),
                         generic_params: FunctionGenericParameters {
                             items: vec![
@@ -214,7 +214,7 @@ mod tests {
                         },
                         ret_ty: Some(Type::from("ReturnType")),
                         body: Some(FunctionBody {
-                            body: Block { body: vec![] }
+                            body: Box::new(Expression::Block(Block { body: vec![] }))
                         })
                     }
                 ))]

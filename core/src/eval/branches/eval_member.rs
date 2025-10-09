@@ -30,6 +30,8 @@ pub fn eval_member(
                 )
                 .and_then(|f| Some(f.clone()))
                 .unwrap_or(Value::Nil),
+
+            Value::Function(_) => todo!(),
             Value::Nil => panic!("Cannot access member {:?} of nil value", cur),
         }
     })

@@ -1,7 +1,7 @@
 use core::ast::*;
 use crustal as C;
 
-use crate::transpile::{transpile_block, transpile_expression, transpile_type::transpile_type};
+use crate::transpile::{transpile_expression, transpile_type::transpile_type};
 
 pub fn transpile_top_level_declaration(declaration: Declaration, scope: &mut C::Scope) {
     match declaration {
@@ -61,8 +61,8 @@ pub fn transpile_top_level_function_declaration(func: FunctionDeclaration, scope
     }
 
     if let Some(body) = func.body {
-        let block = transpile_block(body.body);
-        c_func.set_body(block);
+        let _ = transpile_expression(*body.body);
+        // c_func.set_body(block);
     }
 
     scope.push_function(c_func);

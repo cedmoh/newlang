@@ -197,14 +197,14 @@ identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ 
 block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }
 block_content = _{ ((broken_xp | returned_xp | cont | xp) ~ nls)* }
 
-fn_dl            =  { fn_decorators? ~ fn_name ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_block? }
+fn_dl            =  { fn_decorators? ~ fn_name ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_body? }
 fn_decorators    =  { fn_decorator+ }
 fn_decorator     =  { "@" ~ decorator_name ~ decorator_params? ~ NEWLINE }
 decorator_name   = @{ identifier }
 decorator_params =  { xp ~ ("," ~ xp)* }
 fn_name          =  { identifier }
 fn_type          =  { identifier }
-fn_block         =  { block }
+fn_body         =  { xp }
 fn_generics      =  { "<" ~ fn_generic ~ ("," ~ fn_generic)* ~ ">" }
 fn_generic       =  { generic_name ~ generic_bounds? }
 generic_name     = @{ identifier }

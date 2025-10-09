@@ -2,7 +2,7 @@ use super::super::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDeclaration {
-    pub name: Identifier,
+    pub name: Option<Identifier>,
     pub ty: Option<Type>,
     pub generic_params: FunctionGenericParameters,
     pub params: FunctionParameters,
@@ -34,5 +34,5 @@ pub struct FunctionGenericParameters {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionBody {
-    pub body: Block,
+    pub body: Box<Expression>,
 }
