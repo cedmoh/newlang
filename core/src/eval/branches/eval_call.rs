@@ -1,20 +1,14 @@
 use crate::{
     ast::Call,
-    eval::{Functions, Prelude, Value, Variables, call_function, call_native_function},
+    eval::{GlobalScope, Value, call_function, call_native_function},
+    runtime::ScopeMember,
 };
 
-pub fn eval_call(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    call: Call,
-) -> Value {
-    match (
-        fns.contains_key(&call.callee.id),
-        prelude.contains_key(&call.callee.id),
-    ) {
-        (true, _) => call_function(call, vars, fns, prelude),
-        (_, true) => call_native_function(call, vars, fns, prelude),
-        _ => panic!("Function with the name {} does not exist.", call.callee.id),
+pub fn eval_call(global_scope: &mut GlobalScope, call: Call) -> Value {
+    match global_scope.get(&call.callee.id) {
+        Some(ScopeMember::Function(_)) => call_function(call, global_scope),
+        Some(ScopeMember::NativeFunction(_)) => call_native_function(call, global_scope),
+        Some(_) => panic!("Identifier {} is not a function.", call.callee.id),
+        None => panic!("Function with the name {} does not exist.", call.callee.id),
     }
 }

@@ -1,16 +1,11 @@
 use crate::{
     ast::Return,
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{Value, GlobalScope, evaluate},
 };
 
-pub fn eval_return(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    ret: Return,
-) -> Value {
+pub fn eval_return(global_scope: &mut GlobalScope, ret: Return) -> Value {
     ret.xp
         .as_ref()
-        .map(|xp| evaluate(*xp.clone(), vars, fns, prelude))
+        .map(|xp| evaluate(*xp.clone(), global_scope))
         .unwrap_or(Value::Nil)
 }

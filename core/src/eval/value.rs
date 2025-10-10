@@ -9,7 +9,7 @@ pub enum Value {
     Boolean(bool),
     String(String),
     Map(MiMap),
-    Function(String),
+    Pointer(String),
     Nil,
 }
 
@@ -45,7 +45,7 @@ impl Display for Value {
             Value::Boolean(e) => write!(f, "{}", e),
             Value::String(e) => write!(f, "{}", e),
             Value::Map(e) => write!(f, "[Map {}]", e.len()),
-            Value::Function(e) => write!(f, "[Function {}]", e),
+            Value::Pointer(_) => write!(f, "[Pointer]"),
             Value::Nil => write!(f, "nil"),
         }
     }
@@ -78,8 +78,19 @@ impl Value {
                     "]".dimmed()
                 )
             }
-            Value::Function(e) => format!("{} fn", e.to_string().cyan()),
+            Value::Pointer(e) => format!("-> {}", e.to_string().cyan()),
             Value::Nil => "nil".to_string().dimmed().italic().to_string(),
+        }
+    }
+
+    pub fn get_type_name(&self) -> &'static str {
+        match self {
+            Value::Number(_) => "Number",
+            Value::Boolean(_) => "Boolean",
+            Value::String(_) => "String",
+            Value::Map(_) => "Map",
+            Value::Pointer(_) => "Pointer",
+            Value::Nil => "Nil",
         }
     }
 }

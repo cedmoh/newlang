@@ -1,16 +1,11 @@
 use crate::{
     ast::{Dyadic, DyadicOperator},
-    eval::{Functions, MiMap, Prelude, Value, Variables, evaluate},
+    eval::{GlobalScope, MiMap, Value, evaluate},
 };
 
-pub fn eval_dyadic(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    dyadic: Dyadic,
-) -> Value {
-    let left = evaluate(*dyadic.left, vars, fns, prelude);
-    let right = evaluate(*dyadic.right, vars, fns, prelude);
+pub fn eval_dyadic(global_scope: &mut GlobalScope, dyadic: Dyadic) -> Value {
+    let left = evaluate(*dyadic.left, global_scope);
+    let right = evaluate(*dyadic.right, global_scope);
     match dyadic.operator {
         DyadicOperator::Add => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left + right),

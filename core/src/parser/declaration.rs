@@ -1,6 +1,7 @@
 use super::expression::make_expression;
 use super::rules::Rule;
 use crate::ast::*;
+use nanoid::nanoid;
 use pest::iterators::Pair;
 
 pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
@@ -50,7 +51,13 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
         }
         Rule::fn_dl => {
             let mut inner = pair.into_inner();
-            let name = Identifier::from(inner.next().expect("Expected function name").as_str());
+
+            let next = inner.next().expect("Expected fn_name or fn_args");
+
+            let name = match next.as_rule() {
+                Rule::fn_name => Some(Identifier::from(next.as_str())),
+                _ => None, // Anonymous function
+            };
 
             let mut ty = None;
             let mut generics = FunctionGenericParameters::default();
@@ -123,7 +130,7 @@ pub fn make_declaration(pair: Pair<Rule>) -> Declaration {
             }
 
             Declaration::FunctionDeclaration(FunctionDeclaration {
-                name: Some(name), // TODO: Handle anonymous functions
+                name,
                 ty,
                 generic_params: generics,
                 params: params,

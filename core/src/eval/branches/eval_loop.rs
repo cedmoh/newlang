@@ -1,15 +1,10 @@
 use crate::{
     ast::Loop,
-    eval::{Functions, Prelude, Variables, evaluate},
+    eval::{GlobalScope, evaluate},
 };
 
-pub fn eval_loop(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    r#loop: Loop,
-) -> ! {
+pub fn eval_loop(global_scope: &mut GlobalScope, r#loop: Loop) -> ! {
     loop {
-        evaluate(*r#loop.body.clone(), vars, fns, prelude);
+        evaluate(*r#loop.body.clone(), global_scope);
     }
 }

@@ -7,6 +7,12 @@ pub struct MiMap {
     inner: BTreeMap<MiMapKey, Value>,
 }
 
+impl Default for MiMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MiMap {
     pub fn new() -> Self {
         MiMap {

@@ -1,18 +1,13 @@
 use crate::{
     ast::Call,
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{Value, evaluate},
+    runtime::{GlobalScope, ScopeMember},
 };
 
-pub fn call_function(
-    call: Call,
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-) -> Value {
-    let function = fns.get(&call.callee.id).expect(&format!(
-        "Function with the name {} does not exist.",
-        call.callee.id
-    ));
+pub fn call_function(call: Call, global_scope: &mut GlobalScope) -> Value {
+    let Some(ScopeMember::Function(function)) = global_scope.get(&call.callee.id) else {
+        panic!("Function with the name {} does not exist.", call.callee.id)
+    };
 
     let Some(function_body) = function.body.clone() else {
         return Value::Nil; // Function without body, nothing to evaluate.
@@ -39,43 +34,40 @@ pub fn call_function(
     let to_be_restored = std::iter::zip(call.arguments.items, function.params.items.clone())
         .into_iter()
         .map(|(provided_expression, expected_arg_name)| {
-            let evaluated = evaluate(provided_expression, vars, fns, prelude);
+            let evaluated = evaluate(provided_expression, global_scope);
             let name = expected_arg_name.name.id;
 
-            (name.clone(), vars.insert(name, evaluated))
+            (name.clone(), global_scope.insert_value(name, evaluated))
         })
         .collect::<Vec<_>>();
 
     // FIXME: This will always return the last evaluated expression,
     // fix so that it returns immediately after seeing the first return statement.
-    let evaluation_result = evaluate(*function_body.body, vars, fns, prelude);
+    let evaluation_result = evaluate(*function_body.body, global_scope);
 
     for (name, value) in to_be_restored {
-        if let Some(value) = value {
-            vars.insert(name, value);
+        if let Some(ScopeMember::Value(value)) = value {
+            global_scope.insert_value(name, value);
         }
     }
 
     evaluation_result
 }
 
-pub fn call_native_function(
-    call: Call,
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-) -> Value {
+pub fn call_native_function(call: Call, global_scope: &mut GlobalScope) -> Value {
     let params = call
         .arguments
         .items
         .into_iter()
-        .map(|xp| evaluate(xp, vars, fns, prelude))
+        .map(|xp| evaluate(xp, global_scope))
         .collect::<Vec<_>>();
 
-    let function = prelude.get(&call.callee.id).expect(&format!(
-        "Native function with the name {} does not exist in the current prelude.",
-        call.callee.id
-    ));
+    let Some(ScopeMember::NativeFunction(function)) = global_scope.get(&call.callee.id) else {
+        panic!(
+            "Native function with the name {} does not exist in the current prelude.",
+            call.callee.id
+        )
+    };
 
     (function)(params)
 }

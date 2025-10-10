@@ -1,24 +1,19 @@
 use crate::{
     ast::{IfBranch, IfChain},
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{Value, GlobalScope, evaluate},
 };
 
-pub fn eval_if_chain(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    if_chain: IfChain,
-) -> Value {
+pub fn eval_if_chain(global_scope: &mut GlobalScope, if_chain: IfChain) -> Value {
     for branch in if_chain.branches {
         match branch {
             IfBranch::ElseIf { condition, body } | IfBranch::If { condition, body } => {
-                let evaluated_condition = evaluate(*condition, vars, fns, prelude);
+                let evaluated_condition = evaluate(*condition, global_scope);
 
                 if let Value::Boolean(true) = evaluated_condition {
-                    return evaluate(*body, vars, fns, prelude);
+                    return evaluate(*body, global_scope);
                 };
             }
-            IfBranch::Else { body } => return evaluate(*body, vars, fns, prelude),
+            IfBranch::Else { body } => return evaluate(*body, global_scope),
         }
     }
 

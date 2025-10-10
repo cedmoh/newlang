@@ -1,14 +1,9 @@
 use crate::{
     ast::Literal,
-    eval::{Functions, MiMap, Prelude, Value, Variables, evaluate},
+    eval::{GlobalScope, MiMap, Value, evaluate},
 };
 
-pub fn eval_literal(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    literal: Literal,
-) -> Value {
+pub fn eval_literal(global_scope: &mut GlobalScope, literal: Literal) -> Value {
     match literal {
         Literal::Nil => Value::Nil,
         Literal::Boolean(boolean_literal) => Value::Boolean(boolean_literal.value),
@@ -25,12 +20,12 @@ pub fn eval_literal(
             for (i, entry) in map_literal.entries.into_iter().enumerate() {
                 match entry {
                     crate::ast::MapEntry::Keyed(key, value) => {
-                        let key_val = evaluate(*key, vars, fns, prelude);
-                        let value_val = evaluate(*value, vars, fns, prelude);
+                        let key_val = evaluate(*key, global_scope);
+                        let value_val = evaluate(*value, global_scope);
                         map.push((key_val, value_val));
                     }
                     crate::ast::MapEntry::Unkeyed(value) => {
-                        let value_val = evaluate(*value, vars, fns, prelude);
+                        let value_val = evaluate(*value, global_scope);
                         map.push((Value::Number(i as f64), value_val));
                     }
                 }

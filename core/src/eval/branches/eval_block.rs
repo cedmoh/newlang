@@ -1,13 +1,9 @@
 use crate::{
     ast::Block,
-    eval::{Functions, Prelude, Value, Variables, evaluate_many},
+    eval::{Value, evaluate_many},
+    runtime::GlobalScope,
 };
 
-pub fn eval_block(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    block: Block,
-) -> Value {
-    evaluate_many(block.body, vars, fns, prelude)
+pub fn eval_block(global_scope: &mut GlobalScope, block: Block) -> Value {
+    evaluate_many(block.body, global_scope)
 }

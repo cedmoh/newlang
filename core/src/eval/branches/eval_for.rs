@@ -1,17 +1,12 @@
 use crate::{
     ast::{Break, Expression, For, Return},
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{GlobalScope, Value, evaluate},
 };
 
-pub fn eval_for(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    r#for: For,
-) -> Value {
+pub fn eval_for(global_scope: &mut GlobalScope, r#for: For) -> Value {
     let mut last = Value::Nil;
 
-    let iterator = evaluate(*r#for.iterator, vars, fns, prelude);
+    let iterator = evaluate(*r#for.iterator, global_scope);
 
     match iterator {
         Value::Map(map) => {
@@ -20,20 +15,20 @@ pub fn eval_for(
                 value,
             ) in map.iter()
             {
-                vars.insert(r#for.item.id.clone(), value.clone());
+                global_scope.insert_value(r#for.item.id.clone(), value.clone());
 
                 last = match *r#for.body.clone() {
                     Expression::Return(Return { xp }) => {
                         return xp
-                            .and_then(|v| Some(evaluate(*v, vars, fns, prelude)))
+                            .and_then(|v| Some(evaluate(*v, global_scope)))
                             .unwrap_or(Value::Nil);
                     }
                     Expression::Break(Break { xp }) => {
                         return xp
-                            .and_then(|v| Some(evaluate(*v, vars, fns, prelude)))
+                            .and_then(|v| Some(evaluate(*v, global_scope)))
                             .unwrap_or(Value::Nil);
                     }
-                    v => evaluate(v, vars, fns, prelude),
+                    v => evaluate(v, global_scope),
                 };
             }
         }

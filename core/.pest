@@ -197,7 +197,7 @@ identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ 
 block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }
 block_content = _{ ((broken_xp | returned_xp | cont | xp) ~ nls)* }
 
-fn_dl            =  { fn_decorators? ~ fn_name ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_body? }
+fn_dl            =  { fn_decorators? ~ fn_name? ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_body? }
 fn_decorators    =  { fn_decorator+ }
 fn_decorator     =  { "@" ~ decorator_name ~ decorator_params? ~ NEWLINE }
 decorator_name   = @{ identifier }

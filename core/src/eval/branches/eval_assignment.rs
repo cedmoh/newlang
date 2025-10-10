@@ -1,16 +1,13 @@
 use crate::{
     ast::Assignment,
-    eval::{Functions, Prelude, Value, Variables, evaluate},
+    eval::{GlobalScope, Value, evaluate},
 };
 
-pub fn eval_assignment(
-    vars: &mut Variables,
-    fns: &mut Functions,
-    prelude: &mut Prelude,
-    assignment: Assignment,
-) -> Value {
+pub fn eval_assignment(global_scope: &mut GlobalScope, assignment: Assignment) -> Value {
     let name = assignment.identifier.id.clone();
-    let value = evaluate(*assignment.value, vars, fns, prelude);
-    vars.insert(name, value.clone());
+    let value = evaluate(*assignment.value, global_scope);
+
+    global_scope.insert_value(name, value.clone());
+
     value
 }
