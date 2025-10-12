@@ -140,8 +140,8 @@ evaluation  = _{
   | for_flow
   | if_chain
   | match_xp
-  | member
   | call
+  | member
   | identifier
   | lit
   | par_xp
@@ -155,8 +155,8 @@ call_xp     = _{
   | for_flow
   | if_chain
   | match_xp
-  | member
   | call
+  | member
   | identifier
   | lit
   | par_xp
@@ -170,8 +170,8 @@ assign = { identifier ~ "=" ~ nls ~ xp }
 // Member
 member    =  { (member_xp ~ ".")+ ~ member_xp }
 member_xp = _{
+    // | call
   
-  | call
   | identifier
   | lit
   | par_xp
@@ -180,8 +180,8 @@ member_xp = _{
 // Call
 call            =  { callee ~ call_generics? ~ (call_args_empty | call_args) }
 call_generics   =  { "<" ~ generic_param+ ~ ">" }
-generic_param   = @{ identifier }
-callee          = @{ identifier }
+generic_param   =  { identifier }
+callee          =  { member | identifier }
 call_args       =  { call_args_empty | args_par | args_naked }
 call_args_empty = _{ "(" ~ nls ~ ")" }
 args_par        = _{ "(" ~ nls ~ xp ~ nls ~ (nls ~ "," ~ nls ~ xp)* ~ nls ~ ")" }
@@ -204,7 +204,7 @@ decorator_name   = @{ identifier }
 decorator_params =  { xp ~ ("," ~ xp)* }
 fn_name          =  { identifier }
 fn_type          =  { identifier }
-fn_body         =  { xp }
+fn_body          =  { xp }
 fn_generics      =  { "<" ~ fn_generic ~ ("," ~ fn_generic)* ~ ">" }
 fn_generic       =  { generic_name ~ generic_bounds? }
 generic_name     = @{ identifier }

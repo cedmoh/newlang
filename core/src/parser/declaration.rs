@@ -1,7 +1,6 @@
 use super::expression::make_expression;
 use super::rules::Rule;
 use crate::ast::*;
-use nanoid::nanoid;
 use pest::iterators::Pair;
 
 pub fn make_declaration(pair: Pair<Rule>) -> Declaration {

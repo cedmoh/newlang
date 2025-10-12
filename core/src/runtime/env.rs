@@ -16,20 +16,12 @@ impl Runtime {
         };
 
         runtime.register_std_functions();
-        runtime.register_std_globals();
 
         runtime
     }
 
     fn register_std_functions(&mut self) {
         use crate::runtime::std::*;
-
-        self.insert_native_function(
-            "format".to_string(),
-            NativeFunction {
-                body: Box::new(format),
-            },
-        );
 
         self.insert_native_function(
             "format".to_string(),
@@ -79,10 +71,20 @@ impl Runtime {
                 body: Box::new(range),
             },
         );
-    }
 
-    fn register_std_globals(&mut self) {
-        self.insert_value("Number".to_string(), Value::Map(MiMap::new()));
+        self.insert_native_function(
+            "Number.abs".to_string(),
+            NativeFunction {
+                body: Box::new(abs),
+            },
+        );
+
+        let mut number_map = MiMap::new();
+        number_map.insert(
+            Value::String("abs".to_string()),
+            Value::Pointer("Number.abs".to_string()),
+        );
+        self.insert_value("Number".to_string(), Value::Map(number_map));
     }
 
     pub fn insert_value(&mut self, name: String, value: Value) -> Option<ScopeMember> {
