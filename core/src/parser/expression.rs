@@ -185,13 +185,14 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
             let mut inner = pair.into_inner();
 
             Expression::Call(Call {
-                callee: Identifier {
-                    id: inner
+                callee: Box::new(make_expression(
+                    inner
                         .next()
                         .expect("Expected a callee in call")
-                        .as_str()
-                        .to_string(),
-                },
+                        .into_inner()
+                        .next()
+                        .expect("Expected an expression in callee"),
+                )),
                 arguments: CallArguments {
                     items: inner.next().map_or(Vec::new(), |args| {
                         args.into_inner().map(make_expression).collect()

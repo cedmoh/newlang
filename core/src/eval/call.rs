@@ -1,12 +1,11 @@
 use crate::{
-    ast::Call,
     eval::{Value, evaluate},
     runtime::{GlobalScope, ScopeMember},
 };
 
-pub fn call_function(call: Call, global_scope: &mut GlobalScope) -> Value {
-    let Some(ScopeMember::Function(function)) = global_scope.get(&call.callee.id) else {
-        panic!("Function with the name {} does not exist.", call.callee.id)
+pub fn call_function(name: String, args: Vec<Value>, global_scope: &mut GlobalScope) -> Value {
+    let Some(ScopeMember::Function(function)) = global_scope.get(&name) else {
+        panic!("Function with the name {} does not exist.", name)
     };
 
     let Some(function_body) = function.body.clone() else {
@@ -14,7 +13,7 @@ pub fn call_function(call: Call, global_scope: &mut GlobalScope) -> Value {
     };
 
     let expected_parameter_count = function.params.items.len();
-    let provided_parameter_count = call.arguments.items.len();
+    let provided_parameter_count = args.len();
     if expected_parameter_count != provided_parameter_count {
         panic!(
             "Function {} expected {} parameters, got {} instead.",
@@ -31,13 +30,13 @@ pub fn call_function(call: Call, global_scope: &mut GlobalScope) -> Value {
     // Evaluate provided params and add them to the scope.
     // Save items of the scope with the same names as the params so they can be to_be_restored
     // after function call.
-    let to_be_restored = std::iter::zip(call.arguments.items, function.params.items.clone())
+    let to_be_restored = std::iter::zip(args, function.params.items.clone())
         .into_iter()
-        .map(|(provided_expression, expected_arg_name)| {
-            let evaluated = evaluate(provided_expression, global_scope);
-            let name = expected_arg_name.name.id;
-
-            (name.clone(), global_scope.insert_value(name, evaluated))
+        .map(|(provided_value, expected_arg_name)| {
+            (
+                expected_arg_name.name.id.clone(),
+                global_scope.insert_value(expected_arg_name.name.id, provided_value),
+            )
         })
         .collect::<Vec<_>>();
 
@@ -54,20 +53,29 @@ pub fn call_function(call: Call, global_scope: &mut GlobalScope) -> Value {
     evaluation_result
 }
 
-pub fn call_native_function(call: Call, global_scope: &mut GlobalScope) -> Value {
-    let params = call
-        .arguments
-        .items
-        .into_iter()
-        .map(|xp| evaluate(xp, global_scope))
-        .collect::<Vec<_>>();
+pub fn call_native_function(
+    name: String,
+    args: Vec<Value>,
+    global_scope: &mut GlobalScope,
+) -> Value {
+    let callee_name = name;
 
-    let Some(ScopeMember::NativeFunction(function)) = global_scope.get(&call.callee.id) else {
+    let Some(ScopeMember::NativeFunction(function)) = global_scope.get(&callee_name) else {
         panic!(
             "Native function with the name {} does not exist in the current prelude.",
-            call.callee.id
+            callee_name
         )
     };
 
-    (function)(params)
+    (function)(args)
+}
+
+pub fn follow_pointer<'a>(pointer: &'a str, global_scope: &'a GlobalScope) -> &'a ScopeMember {
+    match global_scope.get(pointer) {
+        Some(ScopeMember::Value(Value::Pointer(addr))) => {
+            return follow_pointer(addr, global_scope);
+        }
+        Some(other) => other,
+        None => panic!("Pointer {} does not exist.", pointer),
+    }
 }

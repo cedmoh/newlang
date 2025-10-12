@@ -1,5 +1,5 @@
 use crate::{
-    ast::{Call, CallArguments, Identifier},
+    ast::{Call, CallArguments, Expression, Identifier},
     eval::{GlobalScope, Value, branches::eval_call},
     runtime::ScopeMember,
 };
@@ -14,7 +14,7 @@ pub fn eval_identifier(global_scope: &mut GlobalScope, identifier: Identifier) -
             return eval_call(
                 global_scope,
                 Call {
-                    callee: identifier.clone(),
+                    callee: Box::new(Expression::Identifier(identifier)),
                     arguments: CallArguments::default(),
                 },
             );
