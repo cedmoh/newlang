@@ -1,6 +1,6 @@
 use crate::eval::Value;
 
-/// Read a line from standard input.
+/// Returns the type of the given value as a string.
 pub fn type_of(params: Vec<Value>) -> Value {
     if params.len() != 1 {
         panic!("expected exactly one argument");

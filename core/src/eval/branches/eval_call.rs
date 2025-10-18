@@ -1,17 +1,26 @@
 use crate::{
-    ast::Call,
-    eval::{GlobalScope, Value, call_function, call_native_function, evaluate, follow_pointer},
+    ast::{Call, Expression},
+    eval::{
+        GlobalScope, Value, branches::eval_member::eval_member_extension_method, call_function,
+        call_native_function, evaluate, follow_pointer,
+    },
     runtime::ScopeMember,
 };
 
 pub fn eval_call(global_scope: &mut GlobalScope, call: Call) -> Value {
-    let callee_id = call.get_callee_name(global_scope);
     let args = call
+        .clone()
         .arguments
         .items
         .into_iter()
         .map(|xp| evaluate(xp, global_scope))
         .collect::<Vec<_>>();
+
+    if let Expression::Member(member) = *call.callee.clone() {
+        return eval_member_extension_method(global_scope, member, args);
+    }
+
+    let callee_id = call.get_callee_name(global_scope);
 
     match global_scope.get(&callee_id) {
         Some(ScopeMember::Function(_)) => call_function(callee_id, args, global_scope),

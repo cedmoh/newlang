@@ -72,6 +72,7 @@ impl Runtime {
             },
         );
 
+        // Number methods
         self.insert_native_function(
             "Number.abs".to_string(),
             NativeFunction {
@@ -85,6 +86,55 @@ impl Runtime {
             Value::Pointer("Number.abs".to_string()),
         );
         self.insert_value("Number".to_string(), Value::Map(number_map));
+
+        // String methods
+        self.insert_native_function(
+            "String.toUpper".to_string(),
+            NativeFunction {
+                body: Box::new(to_upper),
+            },
+        );
+
+        self.insert_native_function(
+            "String.toLower".to_string(),
+            NativeFunction {
+                body: Box::new(to_lower),
+            },
+        );
+
+        self.insert_native_function(
+            "String.len".to_string(),
+            NativeFunction {
+                body: Box::new(len),
+            },
+        );
+
+        self.insert_native_function(
+            "String.repeat".to_string(),
+            NativeFunction {
+                body: Box::new(repeat),
+            },
+        );
+
+        let mut string_map = MiMap::new();
+        string_map.insert(
+            Value::String("toUpper".to_string()),
+            Value::Pointer("String.toUpper".to_string()),
+        );
+        string_map.insert(
+            Value::String("toLower".to_string()),
+            Value::Pointer("String.toLower".to_string()),
+        );
+        string_map.insert(
+            Value::String("len".to_string()),
+            Value::Pointer("String.len".to_string()),
+        );
+        string_map.insert(
+            Value::String("repeat".to_string()),
+            Value::Pointer("String.repeat".to_string()),
+        );
+
+        self.insert_value("String".to_string(), Value::Map(string_map));
     }
 
     pub fn insert_value(&mut self, name: String, value: Value) -> Option<ScopeMember> {

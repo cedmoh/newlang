@@ -1,6 +1,6 @@
 use crate::eval::Value;
 
-/// Checks if all parameters are equal.
+/// Return the absolute value of a number.
 pub fn abs(params: Vec<Value>) -> Value {
     if params.len() != 1 {
         panic!("expected exactly one argument");
