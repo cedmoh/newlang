@@ -2,7 +2,7 @@ use std::iter::once;
 
 use crate::{
     ast::{Expression, Member},
-    eval::{Value, call_native_function, evaluate, make_call},
+    eval::{Value, call_native_function, evaluate},
     runtime::GlobalScope,
 };
 

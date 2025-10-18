@@ -168,8 +168,9 @@ returned_xp =  { ret ~ xp? }
 assign = { identifier ~ "=" ~ nls ~ xp }
 
 // Member
-member    =  { (member_xp ~ ".")+ ~ member_xp  }
+member    =  { (member_xp ~ ".")+ ~ member_xp }
 member_xp = _{
+  
   | call
   | identifier
   | lit
@@ -235,8 +236,9 @@ lit         =  {
   | hexadecimal_lit
 }
 nil_lit     =  { nil }
-string_lit  =  { "'" ~ string_text ~ "'" }
-string_text = @{ (!"'" ~ ANY)* }
+string_lit  = @{ "'" ~ string_text ~ "'" }
+string_text = ${ ('\u{00}'..'\u{26}' | '\u{28}'..'\u{7F}')* }
+// any ascii character except for ' (single quote)
 number_lit  = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
 // the negation in the end is to protect against cases like `1..3` and `1.abs`
 decimal_lit       = { "-"? ~ (ASCII_DIGIT | "_")+ ~ ("." ~ (ASCII_DIGIT | "_")* ~ !("." | ASCII_ALPHA))? }
