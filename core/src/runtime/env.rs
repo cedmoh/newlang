@@ -31,9 +31,9 @@ impl Runtime {
         );
 
         self.insert_native_function(
-            "print".to_string(),
+            "write".to_string(),
             NativeFunction {
-                body: Box::new(print),
+                body: Box::new(write),
             },
         );
 
@@ -41,6 +41,13 @@ impl Runtime {
             "read".to_string(),
             NativeFunction {
                 body: Box::new(read),
+            },
+        );
+
+        self.insert_native_function(
+            "print".to_string(),
+            NativeFunction {
+                body: Box::new(print),
             },
         );
 
@@ -137,6 +144,13 @@ impl Runtime {
         self.insert_native_function(
             "String.at".to_string(),
             NativeFunction { body: Box::new(at) },
+        );
+
+        self.insert_native_function(
+            "String.concat".to_string(),
+            NativeFunction {
+                body: Box::new(concat),
+            },
         );
 
         let mut string_map = MiMap::new();

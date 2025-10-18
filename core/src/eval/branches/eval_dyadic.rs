@@ -20,6 +20,12 @@ pub fn eval_dyadic(global_scope: &mut GlobalScope, dyadic: Dyadic) -> Value {
         },
         DyadicOperator::Multiply => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left * right),
+            (Value::String(s), Value::Number(n)) | (Value::Number(n), Value::String(s)) => {
+                match n.floor() as usize {
+                    0 => Value::String(String::new()),
+                    x => Value::String(s.repeat(x)),
+                }
+            }
             (x, y) => panic!("Invalid operands for multiply: {:?} and {:?}", x, y),
         },
         DyadicOperator::Divide => match (left, right) {

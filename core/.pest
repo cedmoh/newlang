@@ -168,7 +168,7 @@ returned_xp =  { ret ~ xp? }
 assign = { identifier ~ "=" ~ nls ~ xp }
 
 // Member
-member    =  { (member_xp ~ ".")+ ~ member_xp }
+member    =  { (member_xp ~ nls ~ "." ~ nls)+ ~ member_xp }
 member_xp = _{
   
   | call

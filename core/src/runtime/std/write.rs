@@ -1,7 +1,7 @@
 use crate::eval::Value;
 use std::io::{self, Write};
 
-pub fn print(params: Vec<Value>) -> Value {
+pub fn write(params: Vec<Value>) -> Value {
     match params {
         ps if ps.is_empty() => {
             // Do nothing if no parameters are given
@@ -12,9 +12,9 @@ pub fn print(params: Vec<Value>) -> Value {
                 .iter()
                 .map(|p| p.to_string())
                 .collect::<Vec<String>>()
-                .join("\n");
+                .join(" ");
 
-            println!("{}", joined);
+            print!("{}", joined);
 
             io::stdout().flush().unwrap(); // Write to stdout immediately
         }

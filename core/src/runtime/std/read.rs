@@ -4,7 +4,7 @@ use crate::eval::Value;
 pub fn read(params: Vec<Value>) -> Value {
     let mut input = String::new();
 
-    super::print::print(params);
+    super::write::write(params);
 
     if let Err(e) = std::io::stdin().read_line(&mut input) {
         eprintln!("Error reading input: {}", e);

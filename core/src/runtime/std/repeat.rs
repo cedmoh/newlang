@@ -3,6 +3,7 @@ use crate::eval::Value;
 /// Repeat a string a specified number of times.
 pub fn repeat(params: Vec<Value>) -> Value {
     if params.len() != 2 {
+        dbg!(&params);
         panic!("expected exactly 2 arguments, got {}", params.len());
     }
 
