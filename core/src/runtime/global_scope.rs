@@ -5,7 +5,7 @@ use std::{
 
 use crate::{ast::FunctionDeclaration, eval::Value};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct GlobalScope {
     members: HashMap<String, ScopeMember>,
 }
@@ -47,6 +47,7 @@ impl GlobalScope {
     }
 }
 
+#[derive(Debug)]
 pub enum ScopeMember {
     Value(Value),
     Function(FunctionDeclaration),
@@ -58,6 +59,12 @@ type NativeFunctionSignature = Box<dyn Fn(Vec<Value>) -> Value>;
 
 pub struct NativeFunction {
     pub body: NativeFunctionSignature,
+}
+
+impl std::fmt::Debug for NativeFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "NativeFunction")
+    }
 }
 
 impl Deref for NativeFunction {

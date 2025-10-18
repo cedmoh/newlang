@@ -80,10 +80,21 @@ impl Runtime {
             },
         );
 
+        self.insert_native_function(
+            "Number.toString".to_string(),
+            NativeFunction {
+                body: Box::new(to_string),
+            },
+        );
+
         let mut number_map = MiMap::new();
         number_map.insert(
             Value::String("abs".to_string()),
             Value::Pointer("Number.abs".to_string()),
+        );
+        number_map.insert(
+            Value::String("toString".to_string()),
+            Value::Pointer("Number.toString".to_string()),
         );
         self.insert_value("Number".to_string(), Value::Map(number_map));
 
@@ -116,6 +127,18 @@ impl Runtime {
             },
         );
 
+        self.insert_native_function(
+            "String.toString".to_string(),
+            NativeFunction {
+                body: Box::new(to_string),
+            },
+        );
+
+        self.insert_native_function(
+            "String.at".to_string(),
+            NativeFunction { body: Box::new(at) },
+        );
+
         let mut string_map = MiMap::new();
         string_map.insert(
             Value::String("toUpper".to_string()),
@@ -132,6 +155,14 @@ impl Runtime {
         string_map.insert(
             Value::String("repeat".to_string()),
             Value::Pointer("String.repeat".to_string()),
+        );
+        string_map.insert(
+            Value::String("toString".to_string()),
+            Value::Pointer("String.toString".to_string()),
+        );
+        string_map.insert(
+            Value::String("at".to_string()),
+            Value::Pointer("String.at".to_string()),
         );
 
         self.insert_value("String".to_string(), Value::Map(string_map));

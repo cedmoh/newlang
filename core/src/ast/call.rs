@@ -25,6 +25,14 @@ impl Call {
             _ => panic!("Callee must be an identifier or evaluate to a string or pointer."),
         }
     }
+
+    pub fn evaluate_arguments(&self, global_scope: &mut GlobalScope) -> Vec<Value> {
+        self.arguments
+            .items
+            .iter()
+            .map(|arg| evaluate(arg.clone(), global_scope))
+            .collect()
+    }
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]

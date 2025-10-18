@@ -168,24 +168,23 @@ returned_xp =  { ret ~ xp? }
 assign = { identifier ~ "=" ~ nls ~ xp }
 
 // Member
-member    =  { (member_xp ~ ".")+ ~ member_xp }
+member    =  { (member_xp ~ ".")+ ~ member_xp  }
 member_xp = _{
-    // | call
-  
+  | call
   | identifier
   | lit
   | par_xp
 }
 
 // Call
-call            =  { callee ~ call_generics? ~ (call_args_empty | call_args) }
+call            =  { callee ~ call_generics? ~ call_args }
 call_generics   =  { "<" ~ generic_param+ ~ ">" }
 generic_param   =  { identifier }
-callee          =  { member | identifier }
+callee          =  { identifier }
 call_args       =  { call_args_empty | args_par | args_naked }
 call_args_empty = _{ "(" ~ nls ~ ")" }
 args_par        = _{ "(" ~ nls ~ xp ~ nls ~ (nls ~ "," ~ nls ~ xp)* ~ nls ~ ")" }
-args_naked      = _{ call_xp ~ (nls ~ "," ~ call_xp)* }
+args_naked      = _{ call_xp ~ (nls ~ "," ~ nls ~ call_xp)* }
 
 // Declaration
 dl = { var_dl | fn_dl }
