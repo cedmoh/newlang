@@ -243,6 +243,13 @@ pub fn make_expression(pair: Pair<Rule>) -> Expression {
                 xp: inner.next().map(|f| Box::new(make_expression(f))),
             })
         }
+        Rule::broken_xp => {
+            let mut inner = pair.into_inner();
+
+            Expression::Break(Break {
+                xp: inner.next().map(|f| Box::new(make_expression(f))),
+            })
+        }
         Rule::xp => {
             let first = pair
                 .into_inner()

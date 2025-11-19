@@ -145,6 +145,9 @@ evaluation  = _{
   | identifier
   | lit
   | par_xp
+  | returned_xp
+  | broken_xp
+  | cont
 }
 call_xp     = _{
   
@@ -195,7 +198,7 @@ identifier = @{ !(number_lit | (keyword ~ !ASCII_ALPHANUMERIC)) ~ ASCII_ALPHA ~ 
 
 // Blocks
 block         =  { "{" ~ nls ~ block_content ~ nls ~ "}" }
-block_content = _{ ((broken_xp | returned_xp | cont | xp) ~ nls)* }
+block_content = _{ (xp ~ nls)* }
 
 fn_dl            =  { fn_decorators? ~ fn_name? ~ fn_type? ~ fn ~ fn_generics? ~ fn_args? ~ fn_return? ~ fn_body? }
 fn_decorators    =  { fn_decorator+ }
@@ -218,7 +221,7 @@ arg_name         = @{ identifier }
 arg_type         = @{ identifier }
 
 // Variables
-var_dl         =  { var_nomination ~ assignment? ~ var_initial }
+var_dl         =  { var_nomination ~ assignment? ~ var_initial? }
 var_name       = @{ identifier }
 var_type       = @{ identifier }
 val_or_var     = @{ var | val }
@@ -237,7 +240,7 @@ lit         =  {
 }
 nil_lit     =  { nil }
 string_lit  = @{ "'" ~ string_text ~ "'" }
-string_text = ${ ('\u{00}'..'\u{26}' | '\u{28}'..'\u{7F}')* }
+string_text = ${ ('\u{00}'..'\u{26}' | '\u{28}'..'\u{10FFFF}')* }
 // any ascii character except for ' (single quote)
 number_lit  = _{ decimal_lit | binary_lit | octal_lit | hexadecimal_lit }
 // the negation in the end is to protect against cases like `1..3` and `1.abs`

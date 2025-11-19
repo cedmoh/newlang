@@ -27,7 +27,7 @@ pub fn evaluate(xp: Expression, global_scope: &mut GlobalScope) -> Value {
         Expression::Assignment(assignment) => eval_assignment(global_scope, assignment),
         Expression::Match(_match) => todo!(),
         Expression::Member(member) => eval_member(global_scope, member),
-        Expression::Break(_br) => todo!(),
+        Expression::Break(br) => eval_break(global_scope, br),
     }
 }
 

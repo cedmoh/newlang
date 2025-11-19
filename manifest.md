@@ -31,11 +31,13 @@ x val
 
 **NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
 
-Mutable Uninitialized Variable Declaration:
+Mutable Uninitialized Variable Declaration with Explicit Type:
 
 ```
 x int var
 ```
+
+**NOTE:** Uninitialized variable declaration requires the type to include `nil`.
 
 Immutable Uninitialized Variable Declaration with Explicit Type:
 
@@ -44,6 +46,8 @@ x int val
 ```
 
 **NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
+
+**NOTE:** Uninitialized variable declaration requires the type to include `nil`.
 
 Immutable Variable Initialization with Literal:
 
@@ -61,12 +65,6 @@ Immutable Variable Declaration Initialized with Literal Specifying Explicit Type
 
 ```
 x int val 42
-```
-
-Mutable Variable Initialization with Explicit Type:
-
-```
-x val int 100
 ```
 
 Variable Initialization with Expression:
@@ -127,7 +125,7 @@ Division: `/`
 
 Modulus: `%`
 
-Exponent: `**`
+Exponent: `^`
 
 ### Arithmetic Assignment
 
@@ -555,7 +553,7 @@ Breaking Out of a Block:
 
 ```
 {
-  if true { br }
+  if true br
   print 'This will never run'
 }
 ```
@@ -565,7 +563,7 @@ Saving Block Result with Break Condition to Variable:
 ```
 result val
   {
-    if true { br 'Result' }
+    if true br 'Result'
   }
 ```
 
