@@ -34,7 +34,7 @@ x val
 Mutable Uninitialized Variable Declaration with Explicit Type:
 
 ```
-x int var
+x number var
 ```
 
 **NOTE:** Uninitialized variable declaration requires the type to include `nil`.
@@ -42,7 +42,7 @@ x int var
 Immutable Uninitialized Variable Declaration with Explicit Type:
 
 ```
-x int val
+x number val
 ```
 
 **NOTE:** Immutable variable declaration without initialization is illegal and will not compile.
@@ -64,7 +64,7 @@ x var 'hello'
 Immutable Variable Declaration Initialized with Literal Specifying Explicit Type:
 
 ```
-x int val 42
+x number val 42
 ```
 
 Variable Initialization with Expression:
@@ -303,225 +303,216 @@ String with Unicode Characters:
 msg val 'Hello, 世界!'
 ```
 
-### Tuple
+### Map
+
+#### Literal
+
+Empty Map in Literal Assignment:
+
+```
+empty val []
+```
+
+Map with unnamed fields in Literal Assignment:
+
+```
+array val [ 'value1', 42, true ]
+```
+
+Map with named fields in Literal Assignment:
+
+```
+object val [
+  name: 'Alice',
+  age: 30,
+  isMember: true,
+]
+```
+
+Map with mixed named and unnamed fields in Literal Assignment:
+
+```
+mixed val [
+  name: 'Alice',
+  1,
+  2,
+  3,
+  isMember: true,
+]
+```
+
+Map with nested Map in Literal Assignment:
+
+```
+nested val [
+  person: [
+    name: 'Alice',
+    age: 30,
+  ],
+  isMember: true,
+]
+```
+
+Map with Method in Literal Assignment:
+
+```
+withMethod val [
+  x: 10,
+  y: 20,
+  move fn dx, dy {
+    this.x += dx
+    this.y += dy
+  }
+]
+```
 
 #### Type Definition
 
-Tuple Type Definition:
+Record Type Definition:
 
 ```
-(i32 f64 u8)
+Record<string, number>
 ```
-
-```
-(String)
-```
-
-Tuple Type Definition with Named Fields:
-
-```
-(width u32, height u32, zIndex i32)
-```
-
-```
-(size u32,)
-```
-
-Nested Tuple Type Definition:
-
-```
-((i32 f64) (u8 u16))
-```
-
-Tuple Type Definition with Generic Type:
-
-```
-myGenericFunction fn<T> -> (T T)
-```
-
-Tuple Type Definition with Generic Type and Named Fields:
-
-```
-myGenericFunction fn<T> -> (width T, height T)
-```
-
-#### Variable Definition
-
-Tuple Literal with Literals as Members:
-
-```
-(1, 2, 3)
-```
-
-Tuple Literal with Literals of Different Types:
-
-```
-(1, 2.5, 'c')
-```
-
-Tuple Literal with Evaluated Members:
-
-```
-(2 + 2, sine(10), width)
-```
-
-Tuple Literal with Function Call as Member:
-
-```
-(myFunction(param1, param2), myFunction2(param1))
-```
-
-Tuple Literal with Nested Tuples:
-
-```
-(1, (2, 3), 4)
-```
-
-Tuple Literal with Named Fields:
-
-```
-(zIndex 1, width 100, height 200)
-```
-
-Tuple Literal with Named Fields and Mixed Types:
-
-```
-(width 100, height 200, zIndex 'z')
-```
-
-Tuple Literal with Named Fields and Nested Tuples:
-
-```
-(size, (width 100, height 200), zIndex 1)
-```
-
-Tuple Literal with Named Fields and Function Call:
-
-```
-(width {getWidth square}, height {getHeight square})
-```
-
-Tuple Literal with Named Fields and Expression:
-
-```
-(class if getIsVisible() { 'visible' } else { 'hidden' },)
-```
-
-#### Access in Expression
-
-Tuple Value Access with unnamed fields:
-
-```
-myTuple.0
-```
-
-Tuple Value Access with named fields:
-
-```
-myTuple.width
-```
-
-#### Pattern Matching
-
-Tuple Pattern Matching Arm:
-
-```
-match myTuple {
-    x, y, z do todo,
-}
-```
-
-Tuple Pattern Matching Target:
-
-```
-match x, y {
-  _ do todo,
-}
-```
-
-Tuple Destructuring with Named Fields:
-
-```
-x, y, z = myFunction
-```
-
-### Array
-
-#### Type Definition
 
 Array Type Definition:
 
 ```
-str[]
-```
-
-```
-(u8, u8)[]
-```
-
-Nested Array Type Definition:
-
-```
-i32[][]
+string[]
 ```
 
 Array Type Definition with Length:
 
 ```
-u8[16]
+number[16]
 ```
 
-Array Value in Literal Assignment:
+Nested Array Type Definition:
 
 ```
-array val [1, 2, 3, 4, 5]
+number[][]
+```
+
+Array of Tuples Type Definition:
+
+```
+[number, number][]
+```
+
+Tuple Type Definition:
+
+```
+[number, string, boolean]
+```
+
+Nested Tuple Type Definition:
+
+```
+[number, [string, boolean], number]
+```
+
+Object Type Definition:
+
+```
+[
+  x number
+  y number
+  label string
+]
+```
+
+Object Type Definition with Optional Fields:
+
+```
+[
+  x? number
+  y? number
+  label? string
+]
+```
+
+Object Type Definition with Methods:
+
+```
+[
+  x number
+  y number
+  move fn number, number -> nil
+]
+```
+
+Nested Object Type Definition:
+
+```
+[
+  position [
+    x number
+    y number
+  ]
+  label string
+]
 ```
 
 #### Pattern Matching
 
-Array Pattern Matching Arm:
+Map Pattern Matching Arm:
 
 ```
-match myArray {
+match myMap {
     x, y, z do todo
 }
 ```
 
+Map Pattern Matching Target:
+
 ```
-match myArray {
-    x, .. do todo
+match [x, y] {
+  _ do todo
 }
 ```
 
-```
-match myArray {
-    x, ..y do todo
-}
-```
-
-### 2D Matrix
-
-#### Type Definition
-
-Matrix Type Definition:
+Map Destructuring with Named Fields:
 
 ```
-i32[16 16]
+x, y, z = myFunction
 ```
 
-#### Value in Literal Assignment:
+#### Pattern Matching
+
+Map Pattern Matching Arm:
 
 ```
-myMatrix
-| 1, 2, 3 |
-| 4, 5, 6 |
-| 7, 8, 9 |
+match myArray
+  on x, y, z do todo
 ```
 
-#### Access in Expression
+```
+match myArray
+  on x, .. do todo
+```
 
 ```
-myMatrix[0, 1]
+match myArray
+  on x, ..rest do todo
+```
+
+```
+match myArray
+  on first, .., last do todo
+```
+
+```
+match myMap
+  on .x, .y, .z do todo
+```
+
+```
+match myMap
+  on  .x 'explicit', .y rename do todo
+```
+
+```
+match myMap
+  on .x, .inner: [.a, .b], .y do todo
 ```
 
 # Blocks
@@ -543,10 +534,9 @@ Block with Function Call:
 Saving Block Result to Variable:
 
 ```
-result val
-  {
-    'result'
-  }
+result val {
+  'result'
+}
 ```
 
 Breaking Out of a Block:
@@ -561,10 +551,9 @@ Breaking Out of a Block:
 Saving Block Result with Break Condition to Variable:
 
 ```
-result val
-  {
-    if true br 'Result'
-  }
+result val {
+  if true br 'Result'
+}
 ```
 
 # Functions
@@ -642,7 +631,7 @@ myFunction fn<T TypeConstraint + AnotherTypeConstraint, U> arg {}
 Function Call with No Arguments:
 
 ```
-myFunction()
+myFunction
 ```
 
 Function Call with one Parameter:
@@ -711,75 +700,6 @@ Closure Declaration with Arguments:
 myLambda (arg1, arg2) {}
 ```
 
-# Structs
-
-## Declaration
-
-Empty Struct Declaration:
-
-```
-myStruct struct
-```
-
-```
-myStruct struct {}
-```
-
-Struct Declaration with Fields:
-
-```
-myStruct struct {
-  field Type
-  anotherField AnotherType
-}
-```
-
-Generic Struct Declaration:
-
-```
-myGenericStruct struct<T> {
-  field GenericType<T>
-}
-```
-
-# Enums
-
-## Declaration
-
-Enum Declaration:
-
-```
-myEnum enum {
-  Variant
-  AnotherVariant
-}
-```
-
-Enum Declaration with Custom Variant Values:
-
-```
-myEnum enum {
-  Variant 1
-  AnotherVariant 2
-}
-```
-
-```
-myEnum enum {
-  Variant 'value'
-  AnotherVariant 'another value'
-}
-```
-
-Enum Declaration with Loaded Variants:
-
-```
-myEnum enum {
-  Variant(width u32, height u32)
-  AnotherVariant(string number)
-}
-```
-
 # Control Flow
 
 ## If
@@ -816,9 +736,8 @@ elsif true {
 Result of if Statement Saving to Variable:
 
 ```
-result val
-  if true { 'foo' }
-  else { 'bar' }
+result val if true { 'foo' }
+           else { 'bar' }
 ```
 
 ## Match
@@ -826,48 +745,43 @@ result val
 Match Statement with Single Arm:
 
 ```
-match myValue {
-  1 do print 'One',
-}
+match myValue
+  on 1 do print 'One',
 ```
 
 Match Statement with Multiple Arms:
 
 ```
-match myValue {
-  1 do print 'One',
-  2 do print 'Two',
-}
+match myValue
+  on 1 do print 'One',
+  on 2 do print 'Two',
 ```
 
 Match Statement with Default Arm:
 
 ```
-match myValue {
-  1 do print 'One',
-  2 do print 'Two',
-  _ do print 'Other',
-}
+match myValue
+  on 1 do print 'One',
+  on 2 do print 'Two',
+  on _ do print 'Other',
 ```
 
 Match Statement with Pattern Matching:
 
 ```
-match x, y {
-  0, 0 do print 'Both Zero',
-  1, 1 do print 'Both One',
-  _ do print 'Not the Same',
-}
+match [x, y]
+  on 0, 0 do print 'Both Zero',
+  on 1, 1 do print 'Both One',
+  on _ do print 'Not the Same',
 ```
 
 Saving Match Result to Variable:
 
 ```
 result val
-  match myValue {
-    true do 'Yes',
-    false do 'No',
-  }
+  match myValue
+    on true do 'Yes',
+    on false do 'No',
 ```
 
 ## Loop
@@ -942,10 +856,9 @@ while true {
 Saving While Loop Result to Variable:
 
 ```
-result val
-  while true {
-    br 'Result'
-  }
+result val while true {
+  br 'Result'
+}
 ```
 
 ## For-In
@@ -958,7 +871,7 @@ for i in 0..10 {
 }
 ```
 
-for-in Loop with Array:
+for-in Loop with Map:
 
 ```
 for item in [1, 2, 3, 4, 5] {
@@ -966,11 +879,9 @@ for item in [1, 2, 3, 4, 5] {
 }
 ```
 
-for-in Loop with Tuple:
-
 ```
-for item in (1, 2, 3) {
-  print item
+for value, index in [zero: 0, one: 1, two: 2] {
+  print index, value
 }
 ```
 
@@ -978,7 +889,7 @@ for-in Loop with break Condition:
 
 ```
 for item in array {
-  if item == 2 { br }
+  if item == 2 br
   print item
 }
 ```
@@ -986,10 +897,9 @@ for item in array {
 Saving for-in Loop Result to Variable:
 
 ```
-result val
-  for item in array {
-    if item == 2 { br item }
-  }
+result val for item in array {
+  if item == 2 br item
+}
 ```
 
 ## For
@@ -1022,10 +932,9 @@ for i var 10, i > 0, dec i {
 Saving for Loop Result to Variable:
 
 ```
-result val
-  for i var 0, i < 10, inc i {
-    if i == 5 { br i }
-  }
+result val for i var 0, i < 10, inc i {
+  if i == 5 { br i }
+}
 ```
 
 ## Pipe
