@@ -1,5 +1,7 @@
 mod branches;
 mod call;
+mod eval_result;
+mod flow;
 mod types;
 mod value;
 
@@ -9,9 +11,11 @@ pub use value::*;
 
 use crate::ast::*;
 use crate::eval::branches::*;
+use crate::eval::eval_result::EvalResult;
+use crate::eval::flow::Flow;
 use crate::runtime::GlobalScope;
 
-pub fn evaluate(xp: Expression, global_scope: &mut GlobalScope) -> Value {
+pub fn evaluate(xp: Expression, global_scope: &mut GlobalScope) -> EvalResult {
     match xp {
         Expression::Block(block) => eval_block(global_scope, block),
         Expression::Declaration(declaration) => eval_declaration(global_scope, declaration),
@@ -22,39 +26,28 @@ pub fn evaluate(xp: Expression, global_scope: &mut GlobalScope) -> Value {
         Expression::Call(call) => eval_call(global_scope, call),
         Expression::Identifier(identifier) => eval_identifier(global_scope, identifier),
         Expression::Literal(literal) => eval_literal(global_scope, literal),
-        Expression::Return(ret) => eval_return(global_scope, ret),
         Expression::Dyadic(dyadic) => eval_dyadic(global_scope, dyadic),
         Expression::Assignment(assignment) => eval_assignment(global_scope, assignment),
         Expression::Match(_match) => todo!(),
         Expression::Member(member) => eval_member(global_scope, member),
+        Expression::Return(ret) => eval_return(global_scope, ret),
         Expression::Break(br) => eval_break(global_scope, br),
+        Expression::Continue(cont) => eval_continue(global_scope, cont),
     }
 }
 
-pub fn evaluate_many(xps: Vec<Expression>, global_scope: &mut GlobalScope) -> Value {
+pub fn evaluate_many(xps: Vec<Expression>, global_scope: &mut GlobalScope) -> EvalResult {
     let Some((last, rest)) = xps.split_last() else {
-        return Value::Nil; // Empty block
+        return EvalResult::finished(Value::Nil); // Empty block
     };
 
     for xp in rest {
-        match xp {
-            Expression::Return(ret_xp) => {
-                if let Some(xp) = &ret_xp.xp {
-                    evaluate(*xp.clone(), global_scope);
-                } else {
-                    continue;
-                }
-            }
-            Expression::Break(br_xp) => {
-                if let Some(xp) = &br_xp.xp {
-                    evaluate(*xp.clone(), global_scope);
-                } else {
-                    continue;
-                }
-            }
-            _ => {
-                evaluate(xp.clone(), global_scope);
-            }
+        let result = evaluate(xp.clone(), global_scope);
+
+        match &result.flow {
+            Flow::Finished => continue,
+            // Stop evaluation and propagate return, break, continue
+            _ => return result,
         }
     }
 

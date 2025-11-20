@@ -1,10 +1,10 @@
 use crate::{
     ast::Literal,
-    eval::{GlobalScope, MiMap, Value, evaluate},
+    eval::{GlobalScope, MiMap, Value, eval_result::EvalResult, evaluate},
 };
 
-pub fn eval_literal(global_scope: &mut GlobalScope, literal: Literal) -> Value {
-    match literal {
+pub fn eval_literal(global_scope: &mut GlobalScope, literal: Literal) -> EvalResult {
+    EvalResult::finished(match literal {
         Literal::Nil => Value::Nil,
         Literal::Boolean(boolean_literal) => Value::Boolean(boolean_literal.value),
         Literal::String(string_literal) => Value::String(string_literal.value),
@@ -20,12 +20,12 @@ pub fn eval_literal(global_scope: &mut GlobalScope, literal: Literal) -> Value {
             for (i, entry) in map_literal.entries.into_iter().enumerate() {
                 match entry {
                     crate::ast::MapEntry::Keyed(key, value) => {
-                        let key_val = evaluate(*key, global_scope);
-                        let value_val = evaluate(*value, global_scope);
+                        let key_val = evaluate(*key, global_scope).value;
+                        let value_val = evaluate(*value, global_scope).value;
                         map.push((key_val, value_val));
                     }
                     crate::ast::MapEntry::Unkeyed(value) => {
-                        let value_val = evaluate(*value, global_scope);
+                        let value_val = evaluate(*value, global_scope).value;
                         map.push((Value::Number(i as f64), value_val));
                     }
                 }
@@ -33,5 +33,5 @@ pub fn eval_literal(global_scope: &mut GlobalScope, literal: Literal) -> Value {
 
             Value::Map(MiMap::from_vec_keyed(map))
         }
-    }
+    })
 }

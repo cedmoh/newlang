@@ -1,15 +1,15 @@
 use crate::{
     ast::{Call, CallArguments, Expression, Identifier},
-    eval::{GlobalScope, Value, branches::eval_call},
+    eval::{GlobalScope, Value, branches::eval_call, eval_result::EvalResult},
     runtime::ScopeMember,
 };
 
-pub fn eval_identifier(global_scope: &mut GlobalScope, identifier: Identifier) -> Value {
+pub fn eval_identifier(global_scope: &mut GlobalScope, identifier: Identifier) -> EvalResult {
     match global_scope.get(&identifier.id) {
         Some(ScopeMember::Value(Value::Pointer(addr))) => {
             eval_identifier(global_scope, addr.into())
         }
-        Some(ScopeMember::Value(var)) => var.clone(),
+        Some(ScopeMember::Value(var)) => EvalResult::finished(var.clone()),
         Some(ScopeMember::Function(_)) | Some(ScopeMember::NativeFunction(_)) => {
             return eval_call(
                 global_scope,

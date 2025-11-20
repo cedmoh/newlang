@@ -1,23 +1,31 @@
 use crate::{
     ast::{IfBranch, IfChain},
-    eval::{Value, GlobalScope, evaluate},
+    eval::{GlobalScope, Value, eval_result::EvalResult, evaluate},
 };
 
-pub fn eval_if_chain(global_scope: &mut GlobalScope, if_chain: IfChain) -> Value {
+pub fn eval_if_chain(global_scope: &mut GlobalScope, if_chain: IfChain) -> EvalResult {
     for branch in if_chain.branches {
         match branch {
             IfBranch::ElseIf { condition, body } | IfBranch::If { condition, body } => {
-                let evaluated_condition = evaluate(*condition, global_scope);
+                // TODO: Handle return and break in condition expression
+                let evaluated_condition = evaluate(*condition, global_scope).value;
 
                 if let Value::Boolean(true) = evaluated_condition {
-                    return evaluate(*body, global_scope);
+                    let EvalResult { value, flow } = evaluate(*body, global_scope);
+
+                    match flow {
+                        crate::eval::flow::Flow::Finished => return EvalResult::finished(value),
+                        crate::eval::flow::Flow::Returned => return EvalResult::returned(value),
+                        crate::eval::flow::Flow::Broke => return EvalResult::broke(value),
+                        crate::eval::flow::Flow::Continued => return EvalResult::continued(value),
+                    }
                 };
             }
             IfBranch::Else { body } => return evaluate(*body, global_scope),
         }
     }
 
-    Value::Nil
+    EvalResult::finished(Value::Nil)
 }
 
 #[cfg(test)]

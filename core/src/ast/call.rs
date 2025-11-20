@@ -19,7 +19,7 @@ impl Call {
             return identifier.id;
         }
 
-        match evaluate(callee, global_scope) {
+        match evaluate(callee, global_scope).value {
             Value::String(id) => id,
             Value::Pointer(id) => id,
             _ => panic!("Callee must be an identifier or evaluate to a string or pointer."),
@@ -30,7 +30,7 @@ impl Call {
         self.arguments
             .items
             .iter()
-            .map(|arg| evaluate(arg.clone(), global_scope))
+            .map(|arg| evaluate(arg.clone(), global_scope).value)
             .collect()
     }
 }

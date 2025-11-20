@@ -1,12 +1,14 @@
 use crate::{
     ast::{Dyadic, DyadicOperator},
-    eval::{GlobalScope, MiMap, Value, evaluate},
+    eval::{GlobalScope, MiMap, Value, eval_result::EvalResult, evaluate},
 };
 
-pub fn eval_dyadic(global_scope: &mut GlobalScope, dyadic: Dyadic) -> Value {
-    let left = evaluate(*dyadic.left, global_scope);
-    let right = evaluate(*dyadic.right, global_scope);
-    match dyadic.operator {
+pub fn eval_dyadic(global_scope: &mut GlobalScope, dyadic: Dyadic) -> EvalResult {
+    let left = evaluate(*dyadic.left, global_scope).value;
+
+    let right = evaluate(*dyadic.right, global_scope).value;
+
+    EvalResult::finished(match dyadic.operator {
         DyadicOperator::Add => match (left, right) {
             (Value::Number(left), Value::Number(right)) => Value::Number(left + right),
             (Value::String(left), Value::String(right)) => {
@@ -122,5 +124,5 @@ pub fn eval_dyadic(global_scope: &mut GlobalScope, dyadic: Dyadic) -> Value {
             }
             (x, y) => panic!("Invalid operands for range: {:?} and {:?}", x, y),
         },
-    }
+    })
 }

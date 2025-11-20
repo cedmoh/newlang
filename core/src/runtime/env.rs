@@ -197,6 +197,6 @@ impl Runtime {
     pub fn run(&mut self, program: &str) -> Value {
         let ast = parse_program(program);
 
-        evaluate_many(ast.body, &mut self.global_scope)
+        evaluate_many(ast.body, &mut self.global_scope).value
     }
 }

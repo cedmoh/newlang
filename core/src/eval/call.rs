@@ -63,7 +63,7 @@ pub fn call_user_function(name: String, args: Vec<Value>, global_scope: &mut Glo
 
     // FIXME: This will always return the last evaluated expression,
     // fix so that it returns immediately after seeing the first return statement.
-    let evaluation_result = evaluate(*function_body.body, global_scope);
+    let evaluation_result = evaluate(*function_body.body, global_scope).value;
 
     for (name, value) in to_be_restored {
         if let Some(ScopeMember::Value(value)) = value {
